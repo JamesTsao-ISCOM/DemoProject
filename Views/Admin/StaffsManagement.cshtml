@@ -1,0 +1,268 @@
+@model Project01_movie_lease_system.Common.PagedResult<Project01_movie_lease_system.Models.Admin>
+@{
+    ViewData["Title"] = "員工管理";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="fw-bold">員工管理頁</h1>
+        <button class="btn btn-primary" id="btn-addAdminModal">新增員工</button>
+    </div>
+    <div class="mt-md-2 mt-0">
+        <button type="button" class="btn btn-info text-white mt-2 mt-md-0" id="btn-downloadFileTemplate">
+            下載員工資料匯入範本
+        </button>
+        <button type="button" class="btn btn-success text-white mt-2 mt-md-0" id="btn-uploadFileModal">
+            引入員工資料(.xlsx)
+        </button>
+        <button type="button" class="btn btn-primary text-white mt-2 mt-md-0" id="btn-exportFileModal">
+            匯出員工資料(.xlsx,.docx,.pdf)
+        </button>
+    </div>
+    <div id="staffList">
+        <table class="table table-striped" id="adminTable">
+            <thead>
+                <tr>
+                    <th>員工ID</th>
+                    <th>姓名</th>
+                    <th>電子郵件</th>
+                    <th>職位</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+               @* 添加空值檢查 *@
+                @if (Model != null && Model.Items != null)
+                {
+                    @foreach (var staff in Model.Items)
+                    {
+                        @await Html.PartialAsync("_AdminRow", staff)
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">沒有可用的員工資料</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @await Html.PartialAsync("_Pagination", new Project01_movie_lease_system.Common.Pagination{
+            TotalPages = Model.TotalPages,
+            PageNumber = Model.PageNumber,
+            PageSize = Model.PageSize
+        })
+    </div>
+    <!-- 新增員工 Modal -->
+    <div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMovieModalLabel">新增管理員</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createAdminForm">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label for="addUsername" class="form-label">用戶名</label>
+                            <input type="text" class="form-control" id="addUsername" name="Username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addEmail" class="form-label">電子郵件</label>
+                            <input type="email" class="form-control" id="addEmail" name="Email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addPasswordHash" class="form-label">密碼</label>
+                            <input type="password" class="form-control" id="addPasswordHash" name="PasswordHash" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addRole" class="form-label">角色</label>
+                            <select class="form-select" id="addRole" name="Role" required>
+                                <option value="Admin">管理員</option>
+                                <option value="Moderator">版主</option>
+                                <option value="Support">支援人員</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary" form="createAdminForm">新增</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 編輯員工 Modal -->
+    <div class="modal fade" id="editAdminModal" tabindex="-1" aria-labelledby="editAdminModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editAdminModalLabel">編輯管理員</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editAdminForm" enctype="multipart/form-data">
+                <div class="modal-body" style="overflow-y: auto; max-height: calc(100vh - 200px);">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label for="Username" class="form-label">員工匿名</label>
+                            <input type="text" class="form-control" id="Username" name="Username" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Email" class="form-label">電子郵件</label>
+                            <input type="email" class="form-control" id="Email" name="Email" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Role" class="form-label">職位</label>
+                            <select class="form-select" id="Role" name="Role" required>
+                                <option value="Staff">管理員</option>
+                                <option value="Admin">版主</option>
+                                <option value="Support">支援人員</option>
+                            </select>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="submit" class="btn btn-primary">新增</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- 刪除員工 Modal -->
+    <div class="modal fade" id="deleteAdminModal" tabindex="-1" aria-labelledby="deleteAdminModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteAdminModalLabel">刪除管理員</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="deleteAdminForm" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <p id="deleteAdminWarningMessage">您確定要刪除這位管理員嗎？</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                        <button type="button" class="btn btn-danger" id="btn-delete-admin">刪除</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- 上傳員工資料 Modal -->
+    <div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadFileModalLabel">上傳員工資料</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="uploadStaffForm" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">選擇檔案</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                        <button type="submit" class="btn btn-primary" id="btn-upload-file">上傳</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- 下載員工資料 Modal -->
+    <div class="modal fade" id="downloadFileModal" tabindex="-1" aria-labelledby="dowloadFileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dowloadFileModalLabel">下載員工資料</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                    <div class="modal-body">
+                        <p>請選擇要下載的檔案格式：</p>
+                        <select class="form-select" id="fileFormatSelect" name="fileFormat" required>
+                            <option value="xlsx">Excel (.xlsx)</option>
+                            <option value="word">Word (.docx)</option>
+                            <option value="pdf">PDF (.pdf)</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                        <button type="button" class="btn btn-primary" id="btn-download-file">下載</button>
+                    </div>
+            </div>
+        </div>
+    </div>    
+    <!-- 錯誤訊息 Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">錯誤訊息</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorModalMessage">發生錯誤，請稍後再試。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="importFileErrorModal" tabindex="-1" aria-labelledby="importFileErrorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importFileErrorModalLabel">匯入錯誤訊息</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="importFileErrorModalMessage">發生錯誤，請稍後再試。</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-close-importFileErrorModal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 重設密碼 Modal -->
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resetPasswordModalLabel">重設密碼</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="resetPasswordWarningMessage">您確定要重設{userName}的密碼為預設密碼1234嗎?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-primary" id="btn-resetPasswordConfirm">重設密碼</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 下載中... Modal -->
+    <div class="modal fade" id="downloadingFileModal" tabindex="-1" aria-labelledby="downloadingFileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="downloadingFileModalLabel">下載中...</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>正在下載檔案，請稍候...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/js/adminStaffsManagement.js"></script>
+}

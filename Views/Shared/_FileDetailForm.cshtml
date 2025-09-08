@@ -1,0 +1,72 @@
+@model Project01_movie_lease_system.Models.File;
+@{
+    string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB", "TB", "PB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1) {
+            order++;
+            len = len / 1024;
+        }
+        
+        // 小於 1 MB 時顯示為 KB
+        if (order < 2) {
+            return $"{Math.Round(len, 0)} {sizes[order]}";
+        }
+        // 大於等於 1 MB 時顯示兩位小數
+        return $"{Math.Round(len, 2):0.00} {sizes[order]}";
+    }
+}
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="fileDetailModalLabel">檔案詳情</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mb-3">
+                <strong>檔案名稱：</strong>
+                <span id="detail-filename">@Model.FileName</span>
+            </div>
+            <div class="mb-3">
+                <strong>上傳日期：</strong>
+                <span id="detail-uploaddate">@Model.UploadDate.ToString("yyyy-MM-dd HH:mm:ss")</span>
+            </div>
+            <div class="mb-3">
+                <strong>檔案類型：</strong>
+                <span id="detail-filetype">@Model.FileType</span>
+            </div>
+            <div class="mb-3">
+                <strong>檔案大小：</strong>
+                <span id="detail-filesize">@FormatFileSize(Model.FileSize)</span>
+            </div>
+            <div class="mb-3">
+                <strong>說明：</strong>
+                <p id="detail-description">@Model.Description</p>
+            </div>
+            <div class="mb-3">
+                <strong>分類：</strong>
+                <span id="detail-category">@Model.Category</span>
+            </div>
+            <div class="mb-3">
+                <strong>上傳者：</strong>
+                <span id="detail-uploader">@Model.Uploader</span>
+            </div>
+            @if(Model.Category == "video")
+            {
+                <div class="mb-3">
+                    <label for="detail-video" class="form-label"><strong>影片預覽：</strong></label>
+                    <video id="detail-video" data-id="@Model.Id" class="w-100" height="auto" controls>
+                        <source src="~/uploads/files/@Model.StoredFileName" type="video/mp4">
+                        您的瀏覽器不支援 HTML5 視頻標籤。
+                    </video>
+                </div>
+            }
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-close-file-detail" data-bs-dismiss="modal">關閉</button>
+            <button type="button" class="btn btn-primary btn-download-file-detail-word" data-id="@Model.Id">下載檔案詳細資訊WORD</button>
+        </div>
+    </div>
+</div>

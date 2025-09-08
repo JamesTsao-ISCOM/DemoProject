@@ -1,0 +1,144 @@
+﻿@{
+    ViewData["Title"] = "首頁";
+}
+
+<div class="mb-10">
+    <!-- Hero 圖片 -->
+    <img src="~/assets/Test_Hero.jpg"
+         alt="hero image"
+         class="img-fluid rounded mx-auto d-block p-3 w-100 rounded"
+         style="object-fit: cover; width: 100%; height: auto;">
+         
+    <h1 class="mt-2 fw-bold">歡迎來到 MovieGO</h1>
+    <h2>受歡迎的電影</h2>
+
+    <!-- 三張圖片 -->
+    <div class="row row-cols-1 row-cols-md-3 g-3">
+    <div class="col">
+        <div class="card shadow h-100">
+            <img src="https://picsum.photos/id/1025/600/400"
+                 alt="movie 1"
+                 class="card-img-top"
+                 style="object-fit: cover; height: 250px;">
+            <div class="card-body">
+                <h3 class="card-title">title</h3>
+                <p class="card-text">description</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card shadow h-100">
+            <img src="https://picsum.photos/id/1035/600/400"
+                 alt="movie 2"
+                 class="card-img-top"
+                 style="object-fit: cover; height: 250px;">
+            <div class="card-body">
+                <h3 class="card-title">title</h3>
+                <p class="card-text">description</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card shadow h-100">
+            <img src="https://picsum.photos/id/1041/600/400"
+                 alt="movie 3"
+                 class="card-img-top"
+                 style="object-fit: cover; height: 250px;">
+            <div class="card-body">
+                <h3 class="card-title">title</h3>
+                <p class="card-text">description</p>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <!-- 類型 -->
+    <div class="mb-4 mt-4">
+        <h4 class="fw-bold">電影類型</h4>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+            <span class="badge bg-secondary px-3 py-2">動作</span>
+            <span class="badge bg-secondary px-3 py-2">喜劇</span>
+            <span class="badge bg-secondary px-3 py-2">劇情</span>
+            <span class="badge bg-secondary px-3 py-2">恐怖</span>
+            <span class="badge bg-secondary px-3 py-2">科幻</span>
+            <span class="badge bg-secondary px-3 py-2">愛情</span>
+        </div>
+    </div>
+
+    <!-- 使用者評論 -->
+    <div>
+        <h4 class="fw-bold text-white">使用者評論</h4>
+
+        <!-- 評論項目 -->
+        <div class="mt-3 p-3 rounded bg-dark text-white">
+            <div class="d-flex align-items-center mb-2">
+                <img src="https://i.pravatar.cc/40?img=1" alt="user" class="rounded-circle me-2" width="40" height="40">
+                <div>
+                    <strong>蘇菲亞·卡特</strong><br>
+                    <small class="text-muted">2 週前</small>
+                </div>
+            </div>
+            <div class="mb-2 text-warning">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+            </div>
+            <p>超喜歡《失落之城》！劇情引人入勝，角色塑造得很好，必看佳作！</p>
+            <div class="d-flex gap-3">
+                <span><i class="bi bi-hand-thumbs-up"></i> 15</span>
+                <span><i class="bi bi-chat"></i> 2</span>
+            </div>
+        </div>
+
+        <!-- 評論項目 -->
+        <div class="mt-3 p-3 rounded bg-dark text-white">
+            <div class="d-flex align-items-center mb-2">
+                <img src="https://i.pravatar.cc/40?img=2" alt="user" class="rounded-circle me-2" width="40" height="40">
+                <div>
+                    <strong>連恩·班奈特</strong><br>
+                    <small class="text-muted">1 個月前</small>
+                </div>
+            </div>
+            <div class="mb-2 text-warning">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star"></i>
+            </div>
+            <p>這部電影不錯，但中段的節奏稍微有點慢，整體來說還是值得一看。</p>
+            <div class="d-flex gap-3">
+                <span><i class="bi bi-hand-thumbs-up"></i> 8</span>
+                <span><i class="bi bi-chat"></i> 3</span>
+            </div>
+        </div>
+
+        <!-- 評論項目 -->
+        <div class="mt-3 p-3 rounded bg-dark text-white">
+            <div class="d-flex align-items-center mb-2">
+                <img src="https://i.pravatar.cc/40?img=3" alt="user" class="rounded-circle me-2" width="40" height="40">
+                <div>
+                    <strong>奧莉維亞·海耶斯</strong><br>
+                    <small class="text-muted">2 個月前</small>
+                </div>
+            </div>
+            <div class="mb-2 text-warning">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+            </div>
+            <p>超棒的電影！畫面非常驚艷，演技也很精湛，非常推薦給大家。</p>
+            <div class="d-flex gap-3">
+                <span><i class="bi bi-hand-thumbs-up"></i> 20</span>
+                <span><i class="bi bi-chat"></i> 1</span>
+            </div>
+        </div>
+    </div>
+</div>

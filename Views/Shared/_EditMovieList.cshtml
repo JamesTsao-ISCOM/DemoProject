@@ -1,0 +1,13 @@
+@model Project01_movie_lease_system.Common.PagedResult<Project01_movie_lease_system.Models.Movie>
+<p>搜索到 @Model.TotalCount 部電影</p>
+<div class="row row-cols-1 row-cols-md-3 g-3" id="movieCards">
+    @foreach(var movie in Model.Items){
+        @Html.Partial("_MovieEditCard",movie)
+    }
+</div>
+@await Html.PartialAsync("_Pagination", new Project01_movie_lease_system.Common.Pagination
+{
+    TotalPages = Model.TotalPages,
+    PageNumber = Model.PageNumber,
+    PageSize = Model.PageSize
+})

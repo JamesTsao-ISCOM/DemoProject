@@ -1,0 +1,74 @@
+@model Project01_movie_lease_system.Common.Pagination;
+
+<nav aria-label="Page navigation" class="d-flex flex-column align-items-center mt-2">
+  <div class="text-center mb-2">
+    <span>第 @Model.PageNumber 頁/共 @Model.TotalPages 頁</span>
+  </div>
+  <ul class="pagination justify-content-center">
+    <!-- 上一頁按鈕 -->
+    <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+      <a class="page-link" aria-label="Previous"  data-id="@(Model.PageNumber - 1)">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>
+
+    @{
+      const int totalDisplayPages = 5; // 當前頁附近顯示的頁數
+      int startPage = Math.Max(1, Model.PageNumber - totalDisplayPages / 2);
+      int endPage = Math.Min(Model.TotalPages, startPage + totalDisplayPages - 1);
+      
+      // 調整 startPage，確保總是顯示固定數量的頁碼
+      if (endPage - startPage + 1 < totalDisplayPages && startPage > 1)
+      {
+        startPage = Math.Max(1, endPage - totalDisplayPages + 1);
+      }
+      
+      // 顯示第一頁
+      if (startPage > 1)
+      {
+        <li class="page-item">
+          <a class="page-link" data-id="1">1</a>
+        </li>
+        
+        // 如果不是從第2頁開始，顯示省略號
+        if (startPage > 2)
+        {
+          <li class="page-item disabled">
+            <a class="page-link">...</a>
+          </li>
+        }
+      }
+      
+      // 顯示中間頁碼範圍
+      for (int i = startPage; i <= endPage; i++)
+      {
+        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+          <a class="page-link"  data-id="@i">@i</a>
+        </li>
+      }
+      
+      // 顯示最後一頁
+      if (endPage < Model.TotalPages)
+      {
+        // 如果不是到倒數第2頁結束，顯示省略號
+        if (endPage < Model.TotalPages - 1)
+        {
+          <li class="page-item disabled">
+            <a class="page-link" href="#">...</a>
+          </li>
+        }
+        
+        <li class="page-item">
+          <a class="page-link" data-id="@Model.TotalPages">@Model.TotalPages</a>
+        </li>
+      }
+    }
+
+    <!-- 下一頁按鈕 -->
+    <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+      <a class="page-link" aria-label="Next" data-id="@(Model.PageNumber + 1)">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>
+  </ul>
+</nav>

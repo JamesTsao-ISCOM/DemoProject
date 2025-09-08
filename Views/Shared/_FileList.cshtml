@@ -1,0 +1,33 @@
+@model Project01_movie_lease_system.Common.PagedResult<Project01_movie_lease_system.Models.File>
+<div class="card-body">
+    <div class="table-responsive">
+        <table class="table table-hover" id="files-table">
+            <thead>
+                <tr>
+                    <th>選取</th>
+                    <th>檔案名稱</th>
+                    <th>類型</th>
+                    <th>大小</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="files-list">
+                @if(Model.Items.Count() == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center">尚未上傳任何檔案</td>
+                    </tr>
+                }
+                @foreach (var file in Model.Items)
+                {
+                    await Html.RenderPartialAsync("_FileRow", file);
+                }
+            </tbody>
+        </table>
+        @await Html.PartialAsync("_Pagination", new Project01_movie_lease_system.Common.Pagination{
+            TotalPages = Model.TotalPages,
+            PageNumber = Model.PageNumber,
+            PageSize = Model.PageSize
+        })
+    </div>
+</div>

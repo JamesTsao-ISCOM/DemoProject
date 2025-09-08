@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "註冊";
+}
+@model Project01_movie_lease_system.Models.Member
+
+<div class="d-flex justify-content-center">
+    <div class="card shadow p-4 " style="max-width: 400px; width: 100%;">
+        <h3 class="text-center mb-4">註冊帳號</h3>
+        @if(TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        <form asp-controller="Account" asp-action="Register" method="post">
+            <!-- Full Name -->
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">姓名</label>
+                <input asp-for="Name" type="text" class="form-control" id="fullname" placeholder="輸入姓名" required>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label asp-for="Email" for="email" class="form-label">電子郵件</label>
+                <input asp-for="Email" type="email" class="form-control" id="email" placeholder="輸入電子郵件" required>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="mb-3">
+                <label asp-for="PhoneNumber" for="phone" class="form-label">電話號碼</label>
+                <input asp-for="PhoneNumber" type="tel" class="form-control" id="phone" placeholder="輸入電話號碼" required>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label asp-for="PasswordHash" for="password" class="form-label">密碼</label>
+                <input asp-for="PasswordHash" type="password" class="form-control" id="password" placeholder="輸入密碼" required>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" for="confirmPassword" class="form-label">確認密碼</label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control" id="confirmPassword" placeholder="再次輸入密碼" required>
+            </div>
+
+            <!-- Terms -->
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="terms" required>
+                <label class="form-check-label" for="terms">
+                    我同意 <a asp-controller="Home" asp-action="Service">服務條款</a> 與 <a asp-controller="Home" asp-action="Privacy">隱私政策</a>
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-success w-100">註冊</button>
+        </form>
+
+        <!-- Links -->
+        <div class="text-center mt-3">
+            已有帳號？<a asp-controller="Account" asp-action="Login">登入</a>
+        </div>
+    </div>
+</div>

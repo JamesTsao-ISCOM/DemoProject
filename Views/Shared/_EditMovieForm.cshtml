@@ -1,0 +1,95 @@
+@model Project01_movie_lease_system.Models.Movie
+<form id="updateMovieForm" enctype="multipart/form-data" data-movie-id="@Model.Id">
+<div class="modal-body" style="overflow-y: auto; max-height: calc(100vh - 200px);">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label for="editMovieTitle" class="form-label">電影標題</label>
+            <input type="text" class="form-control" id="editMovieTitle" name="Title" value="@Model.Title" required>
+        </div>
+        <div class="mb-3">
+            <label for="editMovieDescription" class="form-label">電影描述</label>
+            <textarea class="form-control" id="editMovieDescription" rows="3" name="Description" required>@Model.Description</textarea>
+        </div>
+        <div class="mb-3">
+            <label for="editMovieType" class="form-label">電影類型</label>
+            <select asp-for="Type" class="form-select" required
+                asp-items="@(new SelectList(new[]
+                {
+                    new { Value = "Action", Text = "動作片" },
+                    new { Value = "Comedy", Text = "喜劇片" },
+                    new { Value = "Drama", Text = "劇情片" },
+                    new { Value = "Horror", Text = "恐怖片" },
+                    new { Value = "SciFi", Text = "科幻片" },
+                    new { Value = "Romance", Text = "愛情片" }
+                }, "Value", "Text", Model.Type))">
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="editMovieReleaseDate" class="form-label">上映日期</label>
+            <input type="date" class="form-control" id="editMovieReleaseDate" name="ReleaseDate" value="@Model.ReleaseDate.ToString("yyyy-MM-dd")" required>
+        </div>
+        <div class="mb-3">
+            <label for="editMovieDirector" class="form-label">導演</label>
+            <input type="text" class="form-control" id="editMovieDirector" name="Director" value="@Model.Director" required>
+        </div>
+        <div class="mb-3">
+            <label for="editMoviePrice" class="form-label">價格</label>
+            <input type="number" class="form-control" id="editMoviePrice" name="Price" value="@Model.Price" required>
+        </div>
+        <div class="mb-3">
+            <label for="editMovieImagePreview" class="form-label">電影圖片預覽</label>
+            <img id="editMovieImagePreview" src="~/uploads/movies/@Model.ImageFileName" alt="電影圖片預覽" style="display:none; max-width:100%;" />
+        </div>
+        <div class="mb-3">
+            <label for="editMovieImage" class="form-label">電影圖片</label>
+            <input class="form-control" type="file" id="editMovieImage" accept="image/*" name="imageFile">
+        </div>
+        <div class="mb-3">
+            <label for="editMovieYTUrl" class="form-label">預告片 YouTube 連結</label>
+            <input type="url" class="form-control" id="editMovieYTUrl" name="YoutubeTrailerUrl" value="@Model.YoutubeTrailerUrl" required>
+        </div>
+        <div id="EditYTPreviewBlock" class="mb-3">
+            @{
+                string embedUrl = "#";
+                string display = "none";
+                if (!string.IsNullOrEmpty(Model.YoutubeTrailerUrl)) 
+                {
+                    string videoId = "";
+                    if (Model.YoutubeTrailerUrl.Contains("youtube.com/watch")) 
+                    {
+                        var uri = new Uri(Model.YoutubeTrailerUrl);
+                        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                        videoId = query["v"] ?? "";
+                    } 
+                    else if (Model.YoutubeTrailerUrl.Contains("youtu.be/")) 
+                    {
+                        videoId = Model.YoutubeTrailerUrl.Split("youtu.be/")[1].Split("?")[0];
+                    }
+                    
+                    if (!string.IsNullOrEmpty(videoId)) 
+                    {
+                        embedUrl = $"https://www.youtube.com/embed/{videoId}";
+                        display = "block";
+                    }
+                }
+            }
+            <label class="form-label">影片預覽</label>
+            <iframe
+                id="EditYTURLPreview"
+                src="@embedUrl"
+                title="YouTube video"
+                style="width: 100%; height: 315px; display: @display;"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen>
+            </iframe>
+        </div>
+        <div class="mb-3">
+            <label for="editMovieStock" class="form-label">庫存數量</label>
+            <input type="number" class="form-control" id="editMovieStock" name="Stock" value="@Model.Stock" required>
+        </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >關閉</button>
+    <button type="submit" class="btn btn-primary btn-update" data-id="@Model.Id">更新</button>
+</div>
+</form>

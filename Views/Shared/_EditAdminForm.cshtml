@@ -1,0 +1,33 @@
+@model Project01_movie_lease_system.Models.Admin;
+<div class="modal-header">
+    <h5 class="modal-title" id="editAdminModalLabel">編輯管理員</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<form id="editAdminForm" enctype="multipart/form-data" data-admin-id="@Model.Id">
+    <div class="modal-body" style="overflow-y: auto; max-height: calc(100vh - 200px);">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label for="Username" class="form-label">員工匿名</label>
+                <input type="text" class="form-control" id="Username" name="Username" value="@Model.Username" required />
+            </div>
+            <div class="mb-3">
+                <label for="Email" class="form-label">電子郵件</label>
+                <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" required />
+            </div>
+            <div class="mb-3">
+                <label for="Role" class="form-label">職位</label>
+               <select asp-for="Role" class="form-select" required
+                asp-items="@(new SelectList(new[]
+                {
+                    new { Value = "Admin", Text = "管理員" },
+                    new { Value = "Moderator", Text = "版主" },
+                    new { Value = "Support", Text = "支援人員" },
+                }, "Value", "Text", Model.Role))">
+            </select>
+            </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+        <button type="submit" class="btn btn-primary">更新</button>
+    </div>
+</form>

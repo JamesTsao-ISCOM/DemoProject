@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "登入";
+}
+@model Project01_movie_lease_system.Models.Member
+<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="w-100" style="max-width: 800px;"> <!-- 調整最大寬度 -->
+        <h1 class="mt-2 fw-bold text-center">登入</h1>
+
+        <div class="card shadow p-4 w-100">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    @ViewBag.Error
+                </div>
+            }
+            <form asp-controller="Account" asp-action="Login" method="post">
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">電子郵件</label>
+                    <input name="email" type="email" class="form-control" id="email" placeholder="輸入電子郵件" required>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="password" class="form-label">密碼</label>
+                    <input name="password" type="password" class="form-control" id="password" placeholder="輸入密碼" required>
+                </div>
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary w-100">登入</button>
+                <button type="button" 
+                        class="btn btn-secondary w-100 mt-2" 
+                        onclick="location.href='@Url.Action("Register", "Account")'">
+                    註冊新帳號
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

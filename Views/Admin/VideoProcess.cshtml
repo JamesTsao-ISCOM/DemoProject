@@ -1,0 +1,115 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "影像處理";
+}
+<h1>影像處理</h1>
+<div class="card p-3">
+    <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="youtubeTab">YouTube 影片控制</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="localTab">本地影片控制</a>
+            </li>
+        </ul>
+    <div id="youtubeVideoContainer" class="mt-3">
+        <h3>YouTube 影片控制</h3>
+       <div class="d-flex flex-col gap-3 mt-2">
+            <input type="text" placeholder="輸入YouTube影片連結" id="youtubeUrlInput" class="form-control w-75" />
+            <button id="loadVideoButton" class="btn btn-primary w-25">載入影片</button>
+        </div>
+        <div class="d-flex justify-content-center align-items-center">
+            <div id="youtubePlayer" class="bg-black text-white d-flex justify-content-center align-items-center mt-3 p-2" style="height: 360px; width: 640px; margin-top: 20px;">
+            尚未載入影片，請輸入YouTube影片連結並點擊載入影片。
+            </div>
+        </div>
+        <div class="d-flex justify-center align-items-center gap-3 my-3">
+            <input type="range" id="videoRange" min="0" max="1" step="0.01" value="0" class="form-range d-inline-block" style="width: 100%;" />
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex gap-2 mt-2 mb-3">
+                <button class="btn btn-primary" id="playButton">播放</button>
+                <button class="btn btn-secondary" id="pauseButton">暫停</button>
+                <button class="btn btn-danger" id="stopButton">停止</button>
+                <button class="btn btn-success" id="seekForwardButton">快轉10秒</button>
+                <button class="btn btn-warning" id="seekBackwardButton">倒轉10秒</button>
+            </div>
+            <div>
+                <span id="currentTimeDisplay">--:--</span> / <span id="durationDisplay">--:--</span>
+            </div>
+        </div>
+        </div>
+        <div class="d-flex gap-3 align-items-center justify-content-between">
+            <div class="d-flex gap-3 align-items-center">
+            <div>
+                <label for="playbackRateSelect">播放速度：</label>
+                <select id="playbackRateSelect" class="form-select w-auto d-inline-block">
+                    <option value="0.25">0.25x</option>
+                    <option value="0.5">0.5x</option>
+                    <option value="1" selected>1x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2x</option>
+                </select>
+                </div>
+                <div>
+                    跳到
+                    <input type="number" id="seekTimeInput" min="0" value="0" class="form-control w-auto d-inline-block" style="width: 80px;" />
+                    秒
+                    <button id="seekToButton" class="btn btn-info">前往</button>
+                </div>
+            </div>
+            <div class="d-flex gap-3 align-items-center">
+                <label for="volumeRange">音量：</label>
+                <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" class="form-range w-auto d-inline-block w-80" />
+                <span id="volumeValue">100%</span>
+            </div>
+        </div>
+    </div>
+    <div id="localVideoContainer" class="mt-3" style="display:none;">
+        <h3>本地影片控制</h3>
+        <div>
+            <label for="localVideoFileInput" class="form-label">選擇本地影片檔案：</label>
+            <input class="form-control" type="file" id="localVideoFileInput" accept="video/*" />
+            <div class="d-flex justify-content-center align-items-center">
+                <div class="bg-black text-white d-flex justify-content-center align-items-center mt-3 p-2" id="localVideoLoadingMessage" style="width: 80%; height: 315px; margin-top: 20px;">
+                    尚未載入影片，請選擇影片檔案。
+                </div>
+            </div>
+            <video id="localVideoPlayer" class="w-100 mt-3" height="auto" controls style="display:none;">
+                您的瀏覽器不支援 HTML5 視頻標籤。
+            </video>
+            <canvas id="videoCanvas" style="display:none;"></canvas>
+        </div>
+        <div class="mt-2 w-100 d-flex gap-2">
+            <label>開始時間 (秒)
+                <input type="number" id="startTime" value="0">
+            </label>
+            <label>結束時間 (秒)
+                <input type="number" id="endTime" value="5">
+            </label>
+            <button id="trimBtn" class="btn btn-primary">剪輯播放</button>
+        </div>
+        <div class="d-flex gap-3">
+            <div class="mt-2 d-flex gap-2">
+            <label>特效</label>
+            <select id="effect">
+                <option value="none">無</option>
+                <option value="grayscale(100%)">灰階</option>
+                <option value="invert(100%)">反色</option>
+                <option value="blur(5px)">模糊</option>
+                <option value="brightness(150%)">亮度+</option>
+                <option value="contrast(200%)">對比+</option>
+            </select>
+        </div>
+        <button id="applyEffectBtn" class="btn btn-primary">套用特效</button>
+    </div>
+    <div class="controls d-flex justify-content-end mt-3"></div>
+        <button id="exportVideoBtn" class="btn btn-success">輸出影片</button>
+    </div>
+    </div>    
+</div>
+@section Scripts {
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ffmpeg.js/0.10.0/ffmpeg.min.js"></script>
+    <script type="module" src="~/js/videoProcess.js"></script>
+}

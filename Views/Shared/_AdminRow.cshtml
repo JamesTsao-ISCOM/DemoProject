@@ -1,0 +1,44 @@
+@model Project01_movie_lease_system.Models.Admin
+@using System.Security.Claims
+@{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var role = User.FindFirstValue(ClaimTypes.Role);
+}
+<tr data-id="@Model.Id">
+    <td>@Model.Id</td>
+    <td>@Model.Username</td>
+    <td>@Model.Email</td>
+    <td>@{
+        var roleName = Model.Role 
+        switch
+        {
+            StaffRole.Admin => "管理員",
+            StaffRole.Moderator => "版主",
+            StaffRole.Support => "支援人員",
+            _ => Model.Role.ToString()
+        };
+        }
+    @roleName
+    </td>
+    @if(Model.Id.ToString() != userId)
+    {
+        <td class="d-flex gap-2">
+            @if(role == "Admin")
+            {
+                <button class="btn btn-warning btn-reset-password" data-id="@Model.Id" data-username="@Model.Username">重設用戶密碼</button>
+            }
+            <button class="btn btn-primary btn-edit-staff" data-id="@Model.Id">編輯</button>
+            <button class="btn btn-danger btn-delete-staff" data-id="@Model.Id" data-username="@Model.Username">刪除</button>
+        </td>
+    }
+    else
+    {
+        <td class="d-flex gap-2">
+            @if(role == "Admin")
+            {
+                <button class="btn btn-warning btn-reset-password" data-id="@Model.Id" data-username="@Model.Username">重設用戶密碼</button>
+            }
+            <button class="btn btn-primary btn-edit-staff" data-id="@Model.Id">編輯</button>
+        </td>
+    }
+</tr>

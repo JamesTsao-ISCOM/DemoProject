@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "管理員登入";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model Project01_movie_lease_system.Models.Admin
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header text-center bg-primary text-white">
+                    <h3>管理員登入</h3>
+                </div>
+                @if(ViewBag.ErrorMessage != null)
+                {
+                    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+                }
+                <div class="card-body">
+                    <form asp-action="Login" method="post">
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <div class="mb-3">
+                            <label name="userName" class="form-label">使用者名稱</label>
+                            <input name="userName" class="form-control" placeholder="請輸入使用者名稱" />
+                        </div>
+                        <div class="mb-3">
+                            <label name="password" class="form-label">密碼</label>
+                            <input name="password" class="form-control" type="password" placeholder="請輸入密碼"/>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">登入</button> 
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

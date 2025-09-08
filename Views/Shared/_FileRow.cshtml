@@ -1,0 +1,36 @@
+@model Project01_movie_lease_system.Models.File
+@{
+    string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB", "TB", "PB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1) {
+            order++;
+            len = len / 1024;
+        }
+        
+        // 小於 1 MB 時顯示為 KB
+        if (order < 2) {
+            return $"{Math.Round(len, 0)} {sizes[order]}";
+        }
+        // 大於等於 1 MB 時顯示兩位小數
+        return $"{Math.Round(len, 2):0.00} {sizes[order]}";
+    }
+}
+<tr id="file-row-@Model.Id">
+    <td>
+        <input type="checkbox" class="form-check-input" data-file-id="@Model.Id" />
+    </td>
+    <td>@Model.FileName</td>
+    <td>@Model.FileType</td>
+    <td>@FormatFileSize(Model.FileSize)</td>
+    <td>
+        <button class="btn btn-info btn-sm btn-file-detail" data-bs-toggle="modal" data-bs-target="#fileDetailModal" data-file-id="@Model.Id">
+            <i class="bi bi-eye"></i> 查看
+        </button>
+        <button class="btn btn-danger btn-sm btn-file-delete" data-file-id="@Model.Id" data-file-name="@Model.FileName">
+            <i class="bi bi-trash"></i> 刪除
+        </button>
+    </td>
+</tr>

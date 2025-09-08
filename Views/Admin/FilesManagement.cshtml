@@ -1,0 +1,392 @@
+@model Project01_movie_lease_system.Common.PagedResult<Project01_movie_lease_system.Models.File>
+@{
+    ViewData["Title"] = "檔案管理頁面";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="fw-bold">檔案管理</h1>
+            <p>在這裡您可以管理上傳的檔案。</p>
+        </div>
+        <div class="card shadow-sm mb-4">
+            <h3 class="fw-bold mt-2">檔案幫手</h3>
+            <div class="d-flex gap-2 mb-2">
+                <button  class="btn btn-primary" id="btn-upload-word-to-pdf">
+                    <i class="bi bi-file-earmark-word"></i>上傳 WORD TO PDF
+                </button>
+                <button  class="btn btn-success" id="btn-upload-excel-to-pdf">
+                    <i class="bi bi-file-earmark-excel"></i>上傳 EXCEL TO PDF
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">檔案列表</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" id="btn-upload-file" data-bs-toggle="modal" data-bs-target="#uploadFileModal">
+                            <i class="bi bi-upload me-1"></i> 上傳一般檔案
+                        </button>
+                        <button class="btn btn-primary" id="btn-upload-video-file" data-bs-toggle="modal" data-bs-target="#uploadVideoFileModal">
+                            <i class="bi bi-upload me-1"></i> 上傳影片檔案
+                        </button>
+                        <button class="btn btn-warning" id="btn-download-files">
+                            <i class="bi bi-download me-1"></i> 下載檔案
+                        </button>
+                        <button class="btn btn-success" id="btn-send-files-email">
+                            <i class="bi bi-send me-1"></i> 發送至電子信箱
+                        </button>
+
+                    </div>
+                </div>
+                <div class="card-body" id="files-list-container">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="files-table">
+                            <thead>
+                                <tr>
+                                    <th>選取</th>
+                                    <th>檔案名稱</th>
+                                    <th>類型</th>
+                                    <th>大小</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="files-list">
+                                @if(Model.Items.Count() == 0)
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center">尚未上傳任何檔案</td>
+                                    </tr>
+                                }
+                                @foreach (var file in Model.Items)
+                                {
+                                    await Html.RenderPartialAsync("_FileRow", file);
+                                }
+                            </tbody>
+                        </table>
+                        @await Html.PartialAsync("_Pagination", new Project01_movie_lease_system.Common.Pagination{
+                            TotalPages = Model.TotalPages,
+                            PageNumber = Model.PageNumber,
+                            PageSize = Model.PageSize
+                        })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 上傳檔案 Modal -->
+<div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadFileModalLabel">上傳檔案</h5>
+                <button type="button" class="btn-close" id="btn-closeUploadFileModal" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="uploadFileForm" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">選擇檔案</label>
+                        <input type="file" class="form-control" id="file" name="file" 
+                               accept=".txt,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.jpg,.jpeg,.png,.gif,.bmp,.csv,.json,.xml" 
+                               required/>
+                        <div class="form-text">
+                            <small class="text-muted">支援格式：文件檔 (.pdf, .doc, .docx)、試算表 (.xls, .xlsx)、簡報檔 (.ppt, .pptx)、圖片檔 (.jpg, .png, .gif 等)、壓縮檔 (.zip, .rar) 及其他常用格式。<br>
+                            <span class="text-danger">不支援影片檔案 (.mp4, .avi, .mov 等)</span></small>
+                        </div>
+                    </div>
+                    <div style="display: none;">
+                        <label for="FileName" class="form-label">檔案名稱</label>
+                        <input type="text" class="form-control" id="input_FileName" name="FileName" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fileDescription" class="form-label">檔案說明</label>
+                        <textarea class="form-control" id="fileDescription" name="Description" rows="3" required></textarea>
+                    </div>
+                    <div>
+                        <label for="file-content-preview" class="form-label">檔案內容預覽</label>
+                        <div id="file-content-preview" class="border p-2" style="min-height: 100px; overflow-y: auto;">
+                           <table class="table table-striped">
+                               <thead>
+                                   <tr>
+                                       <th>檔案名稱</th>
+                                       <th>檔案類型</th>
+                                       <th>最後修改日期</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="file-preview-body">
+                                   <tr>
+                                       <td colspan="3" class="text-center">尚未選擇檔案</td>
+                                   </tr>
+                               </tbody>
+                           </table>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fileCategory" class="form-label">分類</label>
+                        <select class="form-select" id="fileCategory" name="CategoryId" required>
+                            <option value="">-- 請選擇分類 --</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Id">@category.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-cancel-upload">取消</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-file">上傳</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- 上傳影片檔案 Modal -->
+<div class="modal fade" id="uploadVideoFileModal" tabindex="-1" aria-labelledby="uploadVideoFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadVideoFileModalLabel">上傳影片檔案</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadVideoFileForm">
+                    <div style="display: none;">
+                        <label for="FileName" class="form-label">檔案名稱</label>
+                        <input type="text" class="form-control" id="input_VideoName" name="videoName" required/>
+                    </div>
+                    <div style="display: none;">
+                        <label for="videoType" class="form-label">影片類型</label>
+                        <input type="text" class="form-control" id="input_VideoType" name="videoType" required/>
+                    </div>
+                    <div style="display: none;">
+                        <label for="videoSize" class="form-label">影片大小</label>
+                        <input type="text" class="form-control" id="input_VideoSize" name="videoSize" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="videoFile" class="form-label">選擇影片檔案</label>
+                        <input type="file" class="form-control" id="inputVideoFile" accept="video/*" required>
+                    </div>
+                    <div class="mb-3" id="videoUploadProgressContainer" style="display: none;">
+                        <p id="videoUploadProgressMessage">影片上傳中，請稍候...</p>
+                        <div class="progress">
+                            <div class="progress-bar" id="videoUploadProgressBar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="videoPreviewContainer" style="display: none;">
+                        <label for="videoPreview">上傳影片預覽</label>
+                        <div>
+                            <video id="videoPreview" class="w-100" controls>
+                                <source id="videoPreviewSource" src="#" type="video/mp4">
+                                檔案上傳中或檔案無法播放
+                            </video>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="videoDescription" class="form-label">影片說明</label>
+                        <textarea class="form-control" id="videoDescription" name="videoDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="videoCategory" class="form-label">分類</label>
+                        <select class="form-select" id="videoCategory" name="categoryId" required>
+                            <option value="">-- 請選擇分類 --</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Id">@category.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="submit" class="btn btn-primary" form="uploadVideoFileForm">上傳</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 檔案詳情 Modal -->
+<div class="modal fade" id="fileDetailModal" tabindex="-1" aria-labelledby="fileDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" id="file-detail-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fileDetailModalLabel">檔案詳情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<!-- 確認刪除 Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">確認刪除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>您確定要刪除此檔案嗎？此操作無法復原。</p>
+                <p><strong>檔案：</strong> <span id="delete-filename"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="btn-confirm-delete">確認刪除</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingModalLabel">系統</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="loadingModalMessage">檔案處理中，請稍候...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 錯誤訊息 Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">錯誤</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="errorModalMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 刪除檔案 Modal -->
+<div class="modal fade" id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteFileModalLabel">刪除檔案</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>您確定要刪除這個檔案嗎？此操作無法復原。</p>
+                <p><strong>檔案名稱：</strong> <span id="delete-file-name"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-file-btn">確認刪除</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- 上傳Word Modal -->
+<div class="modal fade" id="uploadWordModal" tabindex="-1" aria-labelledby="uploadWordModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadWordModalLabel">上傳Word檔案</h5>
+                <button type="button" class="btn-close" id="btn-closeUploadWordModal" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="uploadWordFileForm" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">選擇檔案</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".doc,.docx" required/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-cancel-upload">取消</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-word-file">上傳</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- 上傳Excel Modal -->
+<div class="modal fade" id="uploadExcelModal" tabindex="-1" aria-labelledby="uploadExcelModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadExcelModalLabel">上傳Excel檔案</h5>
+                <button type="button" class="btn-close" id="btn-closeUploadExcelModal" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="uploadExcelFileForm" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">選擇檔案</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xls,.xlsx" required/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-cancel-upload">取消</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-excel-file">上傳</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- 電子信箱 -->
+<div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emailModalLabel">發送Email</h5>
+                <button type="button" class="btn-close" id="btn-closeEmailModal" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="emailFileForm" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">收件人Email (多個以逗號分隔)</label>
+                        <input type="text" class="form-control" id="email" name="receptor" placeholder="a@example.com, b@example.com" required/>
+                    </div>
+                    <div class="mb-3">
+                            <label for="cc" class="form-label">副本 (CC) - 多個以逗號分隔</label>
+                            <input type="text" class="form-control" id="cc" name="cc" placeholder="c@example.com, d@example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">主旨</label>
+                        <input type="text" class="form-control" id="subject" name="subject" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">郵件內容</label>
+                        <textarea class="form-control" id="message" name="body" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailFileList" class="form-label">附加檔案</label>
+                        <div id="emailFileList" class="border p-2" style="min-height: 100px; max-height: 200px; overflow-y: auto;">
+                            <p class="text-muted">尚未選擇檔案</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-cancel-upload">取消</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-excel-file">傳送</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/filesManagement.js"></script>
+}

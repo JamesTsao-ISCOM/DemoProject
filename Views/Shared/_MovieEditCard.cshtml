@@ -1,0 +1,25 @@
+@model Project01_movie_lease_system.Models.Movie
+<div class="col">
+    <div class="card shadow h-100">
+        <img src= "~/uploads/movies/@Model.ImageFileName"
+            alt="movie 1"
+            class="card-img-top border-bottom"
+            style="object-fit: contain; max-height: 250px; max-width: 100%;">
+        <div class="card-body">
+            <div class="d-flex justify-content-between mb-2 gap-3">
+                <h3 class="card-title">@Model.Title</h3>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-edit" data-id="@Model.Id">
+                        <i class="bi bi-pen text-primary"></i>
+                    </button>
+                    <button class="btn btn-sm btn-delete" data-id="@Model.Id"  >
+                        <i class="bi bi-trash text-danger"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="card-text">導演:@Model.Director</p>
+            <p class="card-text line-clamp-3">@Model.Description</p>
+            <p class="card-text">價格: $@Model.Price</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,257 @@
+@{
+    ViewData["Title"] = "主控板";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model Project01_movie_lease_system.Common.PagedResult<Project01_movie_lease_system.Models.Movie>
+<div class="mb-10">
+    <h1 class="mt-2 fw-bold">管理員主控板</h1>
+    <p>歡迎來到 MovieGo 管理員主控板！</p>
+    <div class="card mb-3">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="searchByName">名稱搜尋</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="searchByType">類型搜尋</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="searchByDate">日期搜尋</a>
+            </li>
+        </ul>
+        <div class="tab-content p-3" id="searchContent">
+            <div class="tab-pane gap-2 fade show active" id="searchByNameContent">
+                <input type="text" placeholder="請輸入電影名稱">
+                <button class="btn btn-primary" id="btn-searchByName">搜尋</button>
+            </div>
+            <div class="tab-pane fade gap-2" id="searchByTypeContent">
+                <select>
+                    <option value="" disabled selected>選擇類型</option>
+                    <option value="Action">動作片</option>
+                    <option value="Comedy">喜劇片</option>
+                    <option value="Drama">劇情片</option>
+                    <option value="Horror">恐怖片</option>
+                    <option value="SciFi">科幻片</option>
+                    <option value="Romance">愛情片</option>
+                </select>
+                <button class="btn btn-primary" id="btn-searchByType">搜尋</button>
+            </div>
+            <div class="tab-pane fade gap-2" id="searchByDateContent">
+                <input type="date" id="startDate"> ~ 
+                <input type="date" id="endDate">
+                <button class="btn btn-primary" id="btn-searchByDate">搜尋</button>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-between">
+        <h3 class="fw-bold" id="searchTitle">電影列表</h3>
+         <!-- 按鈕觸發新增電影 Modal -->
+       <button class="btn btn-primary mb-3" id="addMovieButton">新增電影</button>
+    </div>
+    @if(!Model.Items.Any())
+    {
+        <div>
+            <p class="text-center">目前沒有電影資料</p>
+        </div>
+    }
+    else
+    {
+        <div id="movieList">
+            @await Html.PartialAsync("_EditMovieList", Model)
+        </div>
+    }
+    <!-- 新增電影 Modal -->
+     <div class="modal fade" id="addMovieModal" tabindex="-1" aria-labelledby="addMovieModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMovieModalLabel">新增電影</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="createMovieForm" enctype="multipart/form-data">
+                <div class="modal-body" style="overflow-y: auto; max-height: calc(100vh - 200px);">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label for="addMovieTitle" class="form-label">電影標題</label>
+                            <input type="text" class="form-control" id="addMovieTitle" name="Title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMovieDescription" class="form-label">電影描述</label>
+                            <textarea class="form-control" id="addMovieDescription" rows="3" name="Description" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMovieType" class="form-label">電影類型</label>
+                            <select class="form-select" id="addMovieType" name="Type" required>
+                                <option value="" disabled selected>選擇類型</option>
+                                <option value="Action">動作片</option>
+                                <option value="Comedy">喜劇片</option>
+                                <option value="Drama">劇情片</option>
+                                <option value="Horror">恐怖片</option>
+                                <option value="SciFi">科幻片</option>
+                                <option value="Romance">愛情片</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMovieReleaseDate" class="form-label">上映日期</label>
+                            <input type="date" class="form-control" id="addMovieReleaseDate" name="ReleaseDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMovieDirector" class="form-label">導演</label>
+                            <input type="text" class="form-control" id="addMovieDirector" name="Director" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMoviePrice" class="form-label">價格</label>
+                            <input type="number" class="form-control" id="addMoviePrice" name="Price" required>
+                        </div>
+                        <div class="mb-3">
+                            <img id="addMovieImagePreview" src="#" alt="電影圖片預覽" style="display:none; max-width:100%;"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMovieImage" class="form-label">電影圖片</label>
+                            <input class="form-control" type="file" id="addMovieImage" accept="image/*" name="imageFile">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMovieYTUrl" class="form-label">預告片 YouTube 連結</label>
+                            <input type="url" class="form-control" id="addMovieYTUrl" name="YoutubeTrailerUrl" required>
+                        </div>
+                        <div id="AddYTPreviewBlock" class="mb-3">
+                            <iframe
+                                id="AddYTURLPreview"
+                                src="#"
+                                title="YouTube video"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen
+                                loading="lazy">
+                            </iframe>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addMovieStock" class="form-label">庫存數量</label>
+                            <input type="number" class="form-control" id="addMovieStock" name="Stock" required>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="submit" class="btn btn-primary">新增</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- 編輯電影 Modal -->
+    <div class="modal fade" id="editMovieModal" tabindex="-1" aria-labelledby="editMovieModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editMovieModalLabel">更新電影</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="updateMovieForm" enctype="multipart/form-data">
+                <div class="modal-body" style="overflow-y: auto; max-height: calc(100vh - 200px);">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label for="editMovieTitle" class="form-label">電影標題</label>
+                            <input type="text" class="form-control" id="editMovieTitle" name="Title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMovieDescription" class="form-label">電影描述</label>
+                            <textarea class="form-control" id="editMovieDescription" rows="3" name="Description" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMovieType" class="form-label">電影類型</label>
+                            <select class="form-select" id="editMovieType" name="Type" required>
+                                <option value="" disabled selected>選擇類型</option>
+                                <option value="Action">動作片</option>
+                                <option value="Comedy">喜劇片</option>
+                                <option value="Drama">劇情片</option>
+                                <option value="Horror">恐怖片</option>
+                                <option value="SciFi">科幻片</option>
+                                <option value="Romance">愛情片</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMovieReleaseDate" class="form-label">上映日期</label>
+                            <input type="date" class="form-control" id="editMovieReleaseDate" name="ReleaseDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMovieDirector" class="form-label">導演</label>
+                            <input type="text" class="form-control" id="editMovieDirector" name="Director" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMoviePrice" class="form-label">價格</label>
+                            <input type="number" class="form-control" id="editMoviePrice" name="Price" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMovieImagePreview" class="form-label">電影圖片預覽</label>
+                            <img id="editMovieImagePreview" src="#" alt="電影圖片預覽" style="display:none; max-width:100%;"/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMovieImage" class="form-label">電影圖片</label>
+                            <input class="form-control" type="file" id="editMovieImage" accept="image/*" name="imageFile">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMovieYTUrl" class="form-label">預告片 YouTube 連結</label>
+                            <input type="url" class="form-control" id="editMovieYTUrl" name="YoutubeTrailerUrl" required>
+                        </div>
+                        <div id="EditYTPreviewBlock">
+                            <label for="EditYTURLPreview" class="form-label">電影預告片預覽</label>
+                            <iframe
+                                id="EditYTURLPreview"
+                                src="#"
+                                title="YouTube video"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen
+                                loading="lazy">
+                            </iframe>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editMovieStock" class="form-label">庫存數量</label>
+                            <input type="number" class="form-control" id="editMovieStock" name="Stock" required>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="submit" class="btn btn-primary">更新</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- 刪除電影 Modal -->
+    <div class="modal fade" id="deleteMovieModal" tabindex="-1" aria-labelledby="deleteMovieModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteMovieModalLabel">刪除電影</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="delete-dialog-message">確定要刪除這部電影嗎？此操作無法復原。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">刪除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="errorMessageModal" tabindex="-1" aria-labelledby="errorMessageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorMessageModalLabel">錯誤</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex align-items-center justify-content-center">
+                    <div ">
+                        <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>
+                    </div>
+                    <p id="error-dialog-message">發生錯誤，請稍後再試。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@section  Scripts{
+  <script src="~/js/admin-dashboard.js"></script>
+}

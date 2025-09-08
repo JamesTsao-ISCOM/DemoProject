@@ -1,0 +1,31 @@
+@model Project01_movie_lease_system.Models.Member
+
+<tr>
+    <td>@Model.Id</td>
+    <td>@Model.Name</td>
+    <td>@Model.Email</td>
+    <td>@Model.PhoneNumber</td>
+    <td>@Model.CreatedAt.ToString("yyyy-MM-dd")</td>
+    <td>
+        <span class="badge @(Model.IsVerified ? "bg-success" : "bg-danger")">
+            @(Model.IsVerified ? "啟用" : "停用")
+        </span>
+    </td>
+    <td>
+        @if (Model.IsVerified)
+        {
+            <button class="btn btn-sm btn-warning btn-disable-member" data-id="@Model.Id" data-name="@Model.Name">
+                <i class="bi bi-slash-circle"></i> 停用
+            </button>
+        }
+        else
+        {
+            <button class="btn btn-sm btn-success btn-enable-member" data-id="@Model.Id" data-name="@Model.Name">
+                <i class="bi bi-check-circle"></i> 啟用
+            </button>
+        }
+        <button class="btn btn-sm btn-danger btn-delete-member" data-id="@Model.Id" data-name="@Model.Name">
+            <i class="bi bi-trash"></i> 刪除
+        </button>
+    </td>
+</tr>

@@ -1,0 +1,109 @@
+@{
+     ViewData["Title"] = "個人資料"; 
+}
+@model Project01_movie_lease_system.Models.Member
+
+<h2 class="mb-4">個人資料</h2>
+<div class="alert alert-danger" id="error-message" role="alert" style="display: none;">
+    <strong>錯誤！</strong> 無法更新個人資料，請檢查輸入的資料。
+</div>
+<div class="alert alert-success" id="success-message" role="alert" style="display: none;">
+    <strong>成功！</strong> 個人資料已更新。
+</div>
+<div class="card p-4 shadow-sm">
+    @Html.AntiForgeryToken() <!-- 加上token，防止 CSRF 攻擊-->
+    <div class="mb-3">
+        <strong>姓名：</strong>
+        <input asp-for="Name" id="input-name" type="text" class="form-control edit-form"/>
+    </div>
+    <div class="mb-3">
+        <strong>Email：</strong>
+        <input asp-for="Email" id="input-email" class="form-control edit-form"/>
+    </div>
+    <div class="mb-3">
+        <strong>電話：</strong>
+        <input asp-for="PhoneNumber" id="input-phone-number" type="text" class="form-control edit-form"/>
+    </div>
+    <div class="mb-3">
+        <strong>創建時間：</strong>
+        <span>@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+    </div>
+    <div>
+        <strong>更新時間：</strong>
+        <span>@Model.UpdatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+    </div>
+    <div class="mb-3">
+        <strong>電子郵件是否已驗證：</strong>
+        <span>@(Model.IsVerified ? "是" : "否")</span>
+    </div>
+    <div class="d-flex gap-2">
+        <label>變更密碼:</label>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#change-password-dialog">變更密碼</button>
+    </div>
+    <div class="mt-4">
+        <button class="btn btn-primary" id="btn-profile-edit">編輯</button>
+        <div id="edit-block" style="display: none;">
+            <button class="btn btn-secondary" id="btn-profile-cancel">取消</button>
+            <button class="btn btn-success" id="btn-profile-save">儲存</button>
+        </div>
+    </div>
+    <!-- Modal 結構 -->
+    <div class="modal fade" id="change-password-dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"> <!-- 垂直置中 -->
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="myModalLabel">變更密碼</h5>
+                <button type="button" class="btn-close" id="btn-close-change-pwd-dialog"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="alert alert-danger" id="change-pwd-error-message" role="alert" style="display: none;">
+                   <p id="error-msg"></p>
+                </div>
+                <div class="mb-3">
+                    <label for="input_currentPassword" class="form-label">當前密碼</label>
+                    <input type="password" class="form-control" id="input-current-password" placeholder="請輸入當前密碼">
+                </div>
+                <div class="mb-3">
+                    <label for="input_password" class="form-label">新密碼</label>
+                    <input type="password" class="form-control" id="input-change-password" placeholder="請輸入新密碼">
+                </div>
+                <div class="mb-3">
+                    <label for="input_confirmPassword" class="form-label">確認密碼</label>
+                    <input type="password" class="form-control" id="input-confirm-password" placeholder="請再次輸入新密碼">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btn-close-change-pwd-dialog">關閉</button>
+                <button type="button" class="btn btn-primary" id="btn-change-password">儲存</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+   <div class="modal fade" id="change-success-dialog" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"> <!-- 垂直置中 -->
+        <div class="modal-content">
+        
+            <div class="modal-header">
+                <h5 class="modal-title" id="myModalLabel">設定</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <i class="bi bi-check-circle text-success fs-1"></i> <!-- 綠色空心勾勾 -->
+                <h3 class="mt-3">您的密碼已變更成功</h3>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>
+@section Scripts{
+    <script src="~/js/profile.js"></script>
+}

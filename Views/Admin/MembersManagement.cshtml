@@ -1,0 +1,65 @@
+@model Project01_movie_lease_system.Common.PagedResult<Project01_movie_lease_system.Models.Member>
+@{
+    ViewData["Title"] = "會員管理";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1 class="mt-2 fw-bold">會員管理</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="tab-content" id="searchContent">
+            <div class="tab-pane gap-2 fade show active d-flex gaps-2" id="searchByNameContent">
+                <input type="text" class="form-control" placeholder="請輸入會員姓名或Email" id="memberSearchInput">
+                <button class="btn btn-primary" id="btn-searchByName">搜尋</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-between mb-3">
+    <p>共 @Model.TotalCount 名會員</p>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>姓名</th>
+                <th>電子郵件</th>
+                <th>手機號碼</th>
+                <th>註冊日期</th>
+                <th>驗證狀態</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="memberList">
+            @if (Model != null && Model.Items != null && Model.Items.Any())
+            {
+                @foreach (var member in Model.Items)
+                {
+                    Html.RenderPartial("_MemberRow", member);
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center">沒有會員資料</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (Model != null && Model.TotalPages > 1)
+{
+    @await Html.PartialAsync("_Pagination", new Project01_movie_lease_system.Common.Pagination
+    {
+        TotalPages = Model.TotalPages,
+        PageNumber = Model.PageNumber,
+        PageSize = Model.PageSize
+    })
+}
+
+@section Scripts {
+    <script src="~/js/member-management.js"></script>
+}
