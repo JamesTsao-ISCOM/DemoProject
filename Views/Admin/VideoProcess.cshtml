@@ -2,112 +2,328 @@
     Layout = "_AdminLayout";
     ViewData["Title"] = "影像處理";
 }
-<h1>影像處理</h1>
-<div class="card p-3">
-    <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a class="nav-link active" id="youtubeTab">YouTube 影片控制</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="localTab">本地影片控制</a>
-            </li>
-        </ul>
-    <div id="youtubeVideoContainer" class="mt-3">
-        <h3>YouTube 影片控制</h3>
-       <div class="d-flex flex-col gap-3 mt-2">
-            <input type="text" placeholder="輸入YouTube影片連結" id="youtubeUrlInput" class="form-control w-75" />
-            <button id="loadVideoButton" class="btn btn-primary w-25">載入影片</button>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">影像處理</h1>
         </div>
-        <div class="d-flex justify-content-center align-items-center">
-            <div id="youtubePlayer" class="bg-black text-white d-flex justify-content-center align-items-center mt-3 p-2" style="height: 360px; width: 640px; margin-top: 20px;">
-            尚未載入影片，請輸入YouTube影片連結並點擊載入影片。
-            </div>
-        </div>
-        <div class="d-flex justify-center align-items-center gap-3 my-3">
-            <input type="range" id="videoRange" min="0" max="1" step="0.01" value="0" class="form-range d-inline-block" style="width: 100%;" />
-        </div>
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="d-flex gap-2 mt-2 mb-3">
-                <button class="btn btn-primary" id="playButton">播放</button>
-                <button class="btn btn-secondary" id="pauseButton">暫停</button>
-                <button class="btn btn-danger" id="stopButton">停止</button>
-                <button class="btn btn-success" id="seekForwardButton">快轉10秒</button>
-                <button class="btn btn-warning" id="seekBackwardButton">倒轉10秒</button>
-            </div>
-            <div>
-                <span id="currentTimeDisplay">--:--</span> / <span id="durationDisplay">--:--</span>
-            </div>
-        </div>
-        </div>
-        <div class="d-flex gap-3 align-items-center justify-content-between">
-            <div class="d-flex gap-3 align-items-center">
-            <div>
-                <label for="playbackRateSelect">播放速度：</label>
-                <select id="playbackRateSelect" class="form-select w-auto d-inline-block">
-                    <option value="0.25">0.25x</option>
-                    <option value="0.5">0.5x</option>
-                    <option value="1" selected>1x</option>
-                    <option value="1.5">1.5x</option>
-                    <option value="2">2x</option>
-                </select>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="youtubeTab" data-bs-toggle="tab" href="#youtubeVideoContainer" role="tab">
+                                <i class="bi bi-youtube me-2"></i>YouTube 影片控制
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="localTab" data-bs-toggle="tab" href="#localVideoContainer" role="tab">
+                                <i class="bi bi-camera-video me-2"></i>本地影片控制
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-                <div>
-                    跳到
-                    <input type="number" id="seekTimeInput" min="0" value="0" class="form-control w-auto d-inline-block" style="width: 80px;" />
-                    秒
-                    <button id="seekToButton" class="btn btn-info">前往</button>
+                
+                <div class="card-body">
+                    <div class="tab-content">
+                        <!-- YouTube 影片控制區域 -->
+                        <div class="tab-pane fade show active" id="youtubeVideoContainer" role="tabpanel">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h4 class="mb-4">YouTube 影片控制</h4>
+                                </div>
+                            </div>
+                            
+                            <!-- YouTube 載入區域 -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="input-group">
+                                        <input type="text" placeholder="輸入 YouTube 影片連結" id="youtubeUrlInput" class="form-control" />
+                                        <button id="loadVideoButton" class="btn btn-primary">
+                                            <i class="bi bi-play-circle me-2"></i>載入影片
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- YouTube 播放器 -->
+                            <div class="row mb-4">
+                                <div class="col-12 d-flex justify-content-center">
+                                    <div id="youtubePlayer" class="bg-dark text-white d-flex justify-content-center align-items-center rounded shadow" 
+                                         style="height: 400px; width: 100%; max-width: 720px;">
+                                        <div class="text-center">
+                                            <i class="bi bi-youtube display-1 mb-3"></i>
+                                            <p class="mb-0">尚未載入影片，請輸入 YouTube 影片連結並點擊載入影片</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 進度條 -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <input type="range" id="videoRange" min="0" max="1" step="0.01" value="0" class="form-range" />
+                                </div>
+                            </div>
+                            
+                            <!-- 播放控制 -->
+                            <div class="row mb-4">
+                                <div class="col-md-8">
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-success" id="playButton">
+                                            <i class="bi bi-play-fill"></i> 播放
+                                        </button>
+                                        <button class="btn btn-warning" id="pauseButton">
+                                            <i class="bi bi-pause-fill"></i> 暫停
+                                        </button>
+                                        <button class="btn btn-danger" id="stopButton">
+                                            <i class="bi bi-stop-fill"></i> 停止
+                                        </button>
+                                        <button class="btn btn-info" id="seekBackwardButton">
+                                            <i class="bi bi-skip-backward-fill"></i> 倒轉10秒
+                                        </button>
+                                        <button class="btn btn-info" id="seekForwardButton">
+                                            <i class="bi bi-skip-forward-fill"></i> 快轉10秒
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-secondary fs-6">
+                                        <span id="currentTimeDisplay">--:--</span> / <span id="durationDisplay">--:--</span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- 高級控制 -->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="playbackRateSelect" class="form-label">播放速度</label>
+                                        <select id="playbackRateSelect" class="form-select">
+                                            <option value="0.25">0.25x</option>
+                                            <option value="0.5">0.5x</option>
+                                            <option value="1" selected>1x</option>
+                                            <option value="1.5">1.5x</option>
+                                            <option value="2">2x</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">跳到指定時間</label>
+                                        <div class="input-group">
+                                            <input type="number" id="seekTimeInput" min="0" value="0" class="form-control" />
+                                            <span class="input-group-text">秒</span>
+                                            <button id="seekToButton" class="btn btn-outline-secondary">前往</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="volumeRange" class="form-label">
+                                            音量 
+                                        </label>
+                                        <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" class="form-range" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 本地影片控制區域 -->
+                        <div class="tab-pane fade" id="localVideoContainer" role="tabpanel">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h4 class="mb-4">本地影音控制</h4>
+                                </div>
+                            </div>
+                            
+                            <!-- 檔案選擇區域 -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="bi bi-upload me-2"></i>選擇影片檔案
+                                            </h6>
+                                            <input type="file" id="videoFileInput" accept=".mp4,.webm" class="form-control">
+                                            <div class="form-text">支援格式：MP4、WebM</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 影片預覽區域 -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="bi bi-play-circle me-2"></i>影片預覽
+                                            </h6>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <div id="videoEffectWrapper" class="position-relative rounded shadow-sm overflow-hidden mx-auto" 
+                                                 style="height: 450px; max-width: 800px; background: #000;">
+                                                <video id="previewVideo" class="w-100 h-100" style="object-fit: contain;">
+                                                    <source id="videoSource" src="" type="video/mp4">
+                                                    <source id="videoSourceWebm" src="" type="video/webm">
+                                                    您的瀏覽器不支持視頻播放。
+                                                </video>
+                                            </div>
+                                            <div class="mt-3">
+                                                <div class="btn-group" role="group">
+                                                    <button id="playVideoBtn" class="btn btn-success">
+                                                        <i class="bi bi-play-fill"></i> 播放
+                                                    </button>
+                                                    <button id="pauseVideoBtn" class="btn btn-warning">
+                                                        <i class="bi bi-pause-fill"></i> 暫停
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 隱藏的 Canvas -->
+                            <canvas id="videoCanvas" style="display:none;"></canvas>
+                            
+                            <!-- 剪輯控制區域 -->
+                            <div class="row mb-4">
+                                <div class="col-lg-8">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="bi bi-scissors me-2"></i>剪輯設定
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">影片長度</label>
+                                                <p id="videoDurationText" class="text-muted mb-0">0 秒</p>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">開始時間 (秒)</label>
+                                                        <input type="number" id="startTimeInput" value="0" class="form-control">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">結束時間 (秒)</label>
+                                                        <input type="number" id="endTimeInput" value="5" class="form-control">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="d-grid">
+                                                <button id="trimBtn" class="btn btn-primary">
+                                                    <i class="bi bi-play me-2"></i>預覽剪輯
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="card h-100">
+                                        <div class="card-body d-flex flex-column justify-content-center">
+                                            <div class="text-center">
+                                                <button id="downloadTrimmedBtn" class="btn btn-warning btn-lg w-100">
+                                                    <i class="bi bi-download me-2"></i>下載處理後影片
+                                                </button>
+                                                <div class="form-text mt-2">點擊下載經過剪輯和特效處理的影片</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 處理功能區域 -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="bi bi-arrow-repeat me-2"></i>格式轉換
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">輸出格式</label>
+                                                <select id="outputFormatSelect" class="form-select">
+                                                    <option value="mp4">MP4 (H.264)</option>
+                                                    <option value="webm">WebM</option>
+                                                </select>
+                                                <div class="form-text">選擇要輸出的影片格式</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="bi bi-magic me-2"></i>視覺特效
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">選擇特效</label>
+                                                <select id="effectSelect" class="form-select">
+                                                    <option value="none">無特效</option>
+                                                    <option value="blur">模糊</option>
+                                                    <option value="brightness">增加亮度</option>
+                                                    <option value="grayscale">灰度效果</option>
+                                                </select>
+                                                <div class="form-text">選擇要套用的視覺效果</div>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button id="previewEffectBtn" class="btn btn-primary flex-grow-1">
+                                                    <i class="bi bi-eye me-2"></i>預覽特效
+                                                </button>
+                                                <button id="clearEffectBtn" class="btn btn-outline-secondary">
+                                                    <i class="bi bi-x-circle me-1"></i>清除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 進度顯示區域 -->
+                            <div class="row" id="progressContainer" style="display: none;">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="bi bi-hourglass-split me-2"></i>處理進度
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="progress mb-3" style="height: 20px;">
+                                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                     role="progressbar" style="width: 0%" id="processProgressBar">
+                                                </div>
+                                            </div>
+                                            <div class="text-center">
+                                                <small class="text-muted" id="progressText">準備中...</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="d-flex gap-3 align-items-center">
-                <label for="volumeRange">音量：</label>
-                <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" class="form-range w-auto d-inline-block w-80" />
-                <span id="volumeValue">100%</span>
             </div>
         </div>
     </div>
-    <div id="localVideoContainer" class="mt-3" style="display:none;">
-        <h3>本地影片控制</h3>
-        <div>
-            <label for="localVideoFileInput" class="form-label">選擇本地影片檔案：</label>
-            <input class="form-control" type="file" id="localVideoFileInput" accept="video/*" />
-            <div class="d-flex justify-content-center align-items-center">
-                <div class="bg-black text-white d-flex justify-content-center align-items-center mt-3 p-2" id="localVideoLoadingMessage" style="width: 80%; height: 315px; margin-top: 20px;">
-                    尚未載入影片，請選擇影片檔案。
-                </div>
-            </div>
-            <video id="localVideoPlayer" class="w-100 mt-3" height="auto" controls style="display:none;">
-                您的瀏覽器不支援 HTML5 視頻標籤。
-            </video>
-            <canvas id="videoCanvas" style="display:none;"></canvas>
-        </div>
-        <div class="mt-2 w-100 d-flex gap-2">
-            <label>開始時間 (秒)
-                <input type="number" id="startTime" value="0">
-            </label>
-            <label>結束時間 (秒)
-                <input type="number" id="endTime" value="5">
-            </label>
-            <button id="trimBtn" class="btn btn-primary">剪輯播放</button>
-        </div>
-        <div class="d-flex gap-3">
-            <div class="mt-2 d-flex gap-2">
-            <label>特效</label>
-            <select id="effect">
-                <option value="none">無</option>
-                <option value="grayscale(100%)">灰階</option>
-                <option value="invert(100%)">反色</option>
-                <option value="blur(5px)">模糊</option>
-                <option value="brightness(150%)">亮度+</option>
-                <option value="contrast(200%)">對比+</option>
-            </select>
-        </div>
-        <button id="applyEffectBtn" class="btn btn-primary">套用特效</button>
-    </div>
-    <div class="controls d-flex justify-content-end mt-3"></div>
-        <button id="exportVideoBtn" class="btn btn-success">輸出影片</button>
-    </div>
-    </div>    
 </div>
+
 @section Scripts {
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ffmpeg.js/0.10.0/ffmpeg.min.js"></script>

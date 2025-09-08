@@ -16,14 +16,14 @@ export default class TabController{
     showYouTubeTab(){
         this.youtubeVideoContainer.style.display = "block";
         this.localVideoContainer.style.display = "none";
-        this.setTabActive("youtubeTab");
+        this.setTabActive(this.youtubeTab);
 
         if(this.onTabChange) this.onTabChange("youtube");
     }
     showLocalTab(){
         this.youtubeVideoContainer.style.display = "none";
         this.localVideoContainer.style.display = "block";
-        this.setTabActive("localTab");
+        this.setTabActive(this.localTab);
         if(this.onTabChange) this.onTabChange("local");
     }
     setTabActive(tabElement) {

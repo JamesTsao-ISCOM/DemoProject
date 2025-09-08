@@ -1,7 +1,8 @@
 import TabController from "./videoProcessModule/TabController.js";
 import YTVideoProcessUI from "./videoProcessModule/youtubeVideoProcessUI.js";
 import YouTubeVideoHandler from "./videoProcessModule/youtubeVideoHandler.js";
-
+import LocalVideoProcessUI from "./videoProcessModule/localVideoProcessUI.js";
+import LocalVideoProcessHandler from "./videoProcessModule/localVideoHandler.js";
 $(document).ready(function () {
     try {
         const tabController = new TabController({
@@ -88,6 +89,24 @@ $(document).ready(function () {
                 } catch (error) {
                     console.error("Error setting volume:", error);
                 }
+            }
+        });
+        const localVideoProcessHandler = new LocalVideoProcessHandler(document.getElementById("previewVideo"));
+        const localVideoProcessUI = new LocalVideoProcessUI({
+            onPlay: () => {
+                localVideoProcessHandler.play();
+            },
+            onPause: () => {
+                localVideoProcessHandler.pause();
+            },
+            onPreview: (settings) => {
+                localVideoProcessHandler.preview(settings);
+            },
+            onExport: (videoFile, settings) => {
+                localVideoProcessHandler.export(videoFile, settings);
+            },
+            onClearEffects: () => {
+                localVideoProcessHandler.clearEffects();
             }
         });
     } catch (error) {

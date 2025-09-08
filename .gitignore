@@ -309,6 +309,10 @@ wwwroot/temp/
 Uploads/
 TempFiles/
 
+# FFmpeg binaries
+ffmpeg/
+wwwroot/ffmpeg/
+
 # Logs
 logs/
 *.log
