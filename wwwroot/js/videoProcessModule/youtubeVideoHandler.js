@@ -30,7 +30,6 @@ export default class YouTubeVideoHandler{
                 events:{
                     onReady:(event)=>{
                         console.log("YouTube Player is ready.");
-                        if (onReady) onReady(this.player);
                     },
                     onStateChange:(event)=>{
                         console.log("Player state changed:", event.data);

@@ -26,5 +26,22 @@ namespace Project01_movie_lease_system.Repositories
             return _context.VideoWatchRecords
                 .FirstOrDefault(v => v.AdminId == adminId && v.FileId == fileId);
         }
+        
+        public List<VideoWatchRecord> GetVideoWatchRecordsByFileId(int fileId)
+        {
+            return _context.VideoWatchRecords
+                .Where(v => v.FileId == fileId)
+                .ToList();
+        }
+        
+        public void DeleteVideoWatchRecordsByFileId(int fileId)
+        {
+            var records = _context.VideoWatchRecords.Where(v => v.FileId == fileId).ToList();
+            if (records.Any())
+            {
+                _context.VideoWatchRecords.RemoveRange(records);
+                _context.SaveChanges();
+            }
+        }
     }
 }

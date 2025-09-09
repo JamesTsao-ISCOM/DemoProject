@@ -301,7 +301,47 @@ $(document).ready(function () {
             type:"GET",
             success:function(html){
                $("#fileDetailModal").html(html);
-               resetFileDetailModal();
+               // 確認影片存在後綁定事件
+                const $video = $("#fileDetailModal").find(".detail-video");
+                if ($video.length) {
+                    console.log("Video element found, binding events. videoId:", $video.data("id"));
+                    
+                    // 先綁定事件
+                    $video.on("loadedmetadata", function () {
+                        const videoId = $(this).data("id");
+                        console.log("Video play event, videoId:", videoId);
+                        $.ajax({
+                            url: `/Video/GetWatchHistory/${videoId}`,
+                            type: "GET",
+                            success: function(response) {
+                                console.log("Watch history response:", response);
+                                if(response && response.lastPosition > 0) {
+                                    $video[0].currentTime = response.lastPosition;
+                                    $video[0].play();
+                                }
+                                else{
+                                    $video[0].currentTime = 0;
+                                    $video[0].play();
+                                }
+                            },
+                            error: function(jqXHR, textStatus, errorThrown) {
+                                console.error("Error fetching watch history:", textStatus, errorThrown);
+                            }
+                        });
+                    });
+                    $video.on("play", function () {
+                        const videoId = $(this).data("id");
+                        console.log("Video play event, videoId:", videoId);
+                        startCheckVideoStatus(videoId);
+                    });
+                    $video.on("pause", function () {
+                        const videoId = $(this).data("id");
+                        const currentTime = this.currentTime;
+                        console.log("Video pause event, videoId:", videoId, "currentTime:", currentTime);
+                        clearInterval(videoStatusInterval);
+                        sendProgress(videoId, currentTime, false);
+                    });
+                }
             },
             error:function(jqXHR, textStatus, errorThrown){
                 console.log("Error fetching file details:", textStatus, errorThrown);
@@ -313,7 +353,11 @@ $(document).ready(function () {
     $(document).on("hidden.bs.modal", "#fileDetailModal", function () {
         $("#fileDetailModal").html("");
         clearInterval(videoStatusInterval);
-    }); 
+        $("#fileDetailModal").find(".detail-video").each(function () {
+            $(this)[0].pause();
+            $(this).off("play pause");
+        });
+    });
     // 檔案刪除 - 使用事件委派
     $(document).on("click", ".btn-file-delete", function () {
         showModal("confirmDeleteModal");
@@ -571,40 +615,37 @@ $(document).ready(function () {
             }
         });
     });
-    function resetFileDetailModal(){
-        let videoId;
-        $("#detail-video").off("play").on("play", function () {
-            videoId = $(this).data("id");
-            console.log("video play event, videoId:", videoId);
-            $.ajax({
-                url:`/Video/GetWatchHistory/${videoId}`,
-                type:"GET",
-                success:function(response){
-                    console.log("Setting video currentTime to:", response.lastPosition);
-                    $("#detail-video")[0].currentTime = response.lastPosition || 0;
-                },
-                error:function(jqXHR,textStatus,errorThrown){
-                    console.log("Error fetching watch history:", textStatus, errorThrown);
-                }
-            });
-            startCheckVideoStatus(videoId);
-        });
-        // 監聽影片暫停事件
-        $("#detail-video").off("pause").on("pause", function () {
-            videoId = $(this).data("id");
-            const currentTime = this.currentTime;
-            console.log("video pause event, videoId:", videoId, "currentTime:", currentTime);
-            sendProgress(videoId, currentTime, false);
-            clearInterval(videoStatusInterval);
-        });
-    }
     // 監聽影片播放事件
     function startCheckVideoStatus(videoId){
+        // 清除之前的定時器
+        if (videoStatusInterval) {
+            clearInterval(videoStatusInterval);
+        }
+        
         //影片狀態監聽
         videoStatusInterval = setInterval(() => {
-                const currentTime = $(document).find("#detail-video")[0].currentTime;
+            try {
+                const $video = $("#fileDetailModal").find(".detail-video");
+                if ($video.length === 0) {
+                    console.warn("影片元素不存在，停止監聽");
+                    clearInterval(videoStatusInterval);
+                    return;
+                }
+                
+                const videoElement = $video[0];
+                const currentTime = videoElement.currentTime;
+
+                if (isNaN(currentTime) || videoElement.paused) {
+                    console.warn("影片已暫停或時間無效，跳過此次更新");
+                    return;
+                }
+                
                 console.log("video status check event, videoId:", videoId, "currentTime:", currentTime);
                 sendProgress(videoId, currentTime, false);
+            } catch (error) {
+                console.error("檢查影片狀態時發生錯誤:", error);
+                clearInterval(videoStatusInterval);
+            }
         }, 5000);
     }
     function sendProgress(videoId,lastPosition,isCompleted){

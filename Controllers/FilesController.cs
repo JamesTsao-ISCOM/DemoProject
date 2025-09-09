@@ -23,10 +23,13 @@ namespace Project01_movie_lease_system.Controllers
     {
         private readonly FileRepository _fileRepository;
         private readonly IEmailService _emailService;
-        public FilesController(FileRepository fileRepository, IEmailService emailService)
+        private readonly VideoRecordRepository _videoRecordRepository;
+        
+        public FilesController(FileRepository fileRepository, IEmailService emailService, VideoRecordRepository videoRecordRepository)
         {
             _fileRepository = fileRepository;
             _emailService = emailService;
+            _videoRecordRepository = videoRecordRepository;
         }
         [HttpGet]
         public IActionResult GetPagedFiles(int pageNumber=1, int pageSize=10)
@@ -317,25 +320,58 @@ namespace Project01_movie_lease_system.Controllers
             {
                 return Unauthorized("請先登入系統");
             }
-            var file = _fileRepository.GetFileById(id);
-            if (file == null)
+            try
             {
-                return NotFound("找不到指定的檔案");
+                var file = _fileRepository.GetFileById(id);
+                if (file == null)
+                {
+                    return NotFound("找不到指定的檔案");
+                }
+
+                Console.WriteLine($"準備刪除檔案: {file.FileName} (ID: {id})");
+
+                // 1. 先檢查並刪除相關的 VideoWatchRecords
+                var videoWatchRecords = _videoRecordRepository.GetVideoWatchRecordsByFileId(id);
+                if (videoWatchRecords.Any())
+                {
+                    Console.WriteLine($"發現 {videoWatchRecords.Count} 筆相關的觀看記錄，準備刪除");
+                    _videoRecordRepository.DeleteVideoWatchRecordsByFileId(id);
+                    Console.WriteLine("相關觀看記錄已刪除");
+                }
+
+                // 2. 刪除實體檔案
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "files", file.StoredFileName);
+                if (System.IO.File.Exists(filePath))
+                {
+                    try
+                    {
+                        System.IO.File.Delete(filePath);
+                        Console.WriteLine($"實體檔案已刪除: {filePath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"刪除實體檔案失敗: {ex.Message}");
+                        return BadRequest($"檔案刪除失敗: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"實體檔案不存在: {filePath}");
+                }
+
+                // 3. 最後刪除檔案記錄
+                _fileRepository.DeleteFile(id);
+                Console.WriteLine("檔案記錄已從資料庫刪除");
+                Console.WriteLine($"檔案 {file.FileName} 刪除完成");
+
+                return Ok("檔案刪除成功");
             }
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "files", file.StoredFileName);
-            if (System.IO.File.Exists(filePath))
+            catch (Exception ex)
             {
-                try
-                {
-                    System.IO.File.Delete(filePath);
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest($"檔案刪除失敗: {ex.Message}");
-                }
+                Console.WriteLine($"刪除檔案時發生錯誤: {ex.Message}");
+                Console.WriteLine($"錯誤堆疊: {ex.StackTrace}");
+                return BadRequest($"刪除檔案時發生錯誤: {ex.Message}");
             }
-            _fileRepository.DeleteFile(id);
-            return Ok("檔案刪除成功");
         }
         [HttpGet]
         public IActionResult GetFileById(int id)
@@ -500,21 +536,6 @@ namespace Project01_movie_lease_system.Controllers
             using (var workbook = new Workbook())
             {
                 workbook.LoadFromFile(inputPath);
-
-                // 設置紙張大小
-                foreach (Worksheet sheet in workbook.Worksheets)
-                {
-                    sheet.PageSetup.PaperSize = PaperSizeType.PaperA4; // 固定為 A4
-                    sheet.PageSetup.Orientation = PageOrientationType.Portrait; // 設置為直向（可選橫向：Landscape）
-                    sheet.PageSetup.FitToPagesWide = 1; // 每頁寬度適配
-                    sheet.PageSetup.FitToPagesTall = 0; // 自動調整高度
-                    // 可選：設置邊距（單位：英寸）
-                    sheet.PageSetup.LeftMargin = 0.5f;
-                    sheet.PageSetup.RightMargin = 0.5f;
-                    sheet.PageSetup.TopMargin = 0.5f;
-                    sheet.PageSetup.BottomMargin = 0.5f;
-                }
-
                 workbook.ConverterSetting.SheetFitToPage = true; // 確保內容適配頁面
                 workbook.SaveToFile(outputPath, Spire.Xls.FileFormat.PDF);
                 workbook.Dispose(); //保釋放所有資源（託管和非託管），避免記憶體洩漏或檔案鎖定。
