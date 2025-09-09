@@ -293,25 +293,15 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- 進度顯示區域 -->
-                            <div class="row" id="progressContainer" style="display: none;">
-                                <div class="col-12">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">
-                                                <i class="bi bi-hourglass-split me-2"></i>處理進度
-                                            </h6>
+                            <div class="modal" id="videoProcessModal" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">影像處理</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <div class="card-body">
-                                            <div class="progress mb-3" style="height: 20px;">
-                                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                                     role="progressbar" style="width: 0%" id="processProgressBar">
-                                                </div>
-                                            </div>
-                                            <div class="text-center">
-                                                <small class="text-muted" id="progressText">準備中...</small>
-                                            </div>
+                                        <div class="modal-body">
+                                            <p>影像處理中... 請稍後...</p>
                                         </div>
                                     </div>
                                 </div>

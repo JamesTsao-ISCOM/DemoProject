@@ -2,6 +2,7 @@ export default class LocalVideoProcessHandler{
     constructor(videoElement){
         this.videoElement = videoElement;
         this.effectWrapper = document.getElementById('effectWrapper');
+        this.loadingModal = $('#videoProcessModal');
     }
     play(){
         this.videoElement.play();
@@ -37,7 +38,7 @@ export default class LocalVideoProcessHandler{
     export(videoFile, settings){
         console.log("Exporting video file:", videoFile);
         console.log("Exporting with settings:",settings);
-        
+        this.loadingModal.modal("show");
         // 驗證參數
         if (!videoFile) {
             alert("請先選擇影片檔案");
@@ -94,6 +95,7 @@ export default class LocalVideoProcessHandler{
                 setTimeout(()=>{
                     window.URL.revokeObjectURL(url);
                     a.remove();
+                    this.loadingModal.modal("hide");
                 },100);
             },
             error: (error) => {
