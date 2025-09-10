@@ -413,8 +413,8 @@ namespace Project01_movie_lease_system.Controllers
                 using (var zipArchive = ZipArchive.Create())
                 {
                     var memoryStreams = new List<MemoryStream>();
-
                     var fileContents = new List<(string FileName, byte[] Content)>();
+                    var usedFileNames = new HashSet<string>(); // 追蹤已使用的檔案名稱
 
                     foreach (var id in fileIds)
                     {
@@ -442,9 +442,20 @@ namespace Project01_movie_lease_system.Controllers
                             byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
 
                             // 確保檔名安全（去掉目錄）
-                            var safeFileName = Path.GetFileName(file.FileName);
+                            var originalFileName = Path.GetFileName(file.FileName);
+                            var safeFileName = originalFileName;
+                            var counter = 1;
 
-                            // 放入清單
+                            // 處理同名檔案問題
+                            while (usedFileNames.Contains(safeFileName))
+                            {
+                                var fileExtension = Path.GetExtension(originalFileName);
+                                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileName);
+                                safeFileName = $"{fileNameWithoutExtension}({counter}){fileExtension}";
+                                counter++;
+                            }
+
+                            usedFileNames.Add(safeFileName);
                             fileContents.Add((safeFileName, fileBytes));
 
                             Console.WriteLine($"已讀取: {safeFileName}, 大小: {fileBytes.Length} bytes");
@@ -633,8 +644,23 @@ namespace Project01_movie_lease_system.Controllers
                     if (file != null)
                     {
                         var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "files", file.StoredFileName);
-                        attachmentPaths.Add(file.FileName, filePath);
-                        Console.WriteLine($"Added Email attachment: {filePath}");
+                        
+                        // 處理同名檔案問題
+                        var fileName = file.FileName;
+                        var originalFileName = fileName;
+                        var counter = 1;
+                        
+                        // 如果檔名已存在，自動加上編號
+                        while (attachmentPaths.ContainsKey(fileName))
+                        {
+                            var fileExtension = Path.GetExtension(originalFileName);
+                            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileName);
+                            fileName = $"{fileNameWithoutExtension}({counter}){fileExtension}";
+                            counter++;
+                        }
+                        
+                        attachmentPaths.Add(fileName, filePath);
+                        Console.WriteLine($"Added Email attachment: {fileName} -> {filePath}");
                     }
                 }
             }
