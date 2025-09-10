@@ -1,5 +1,5 @@
 # 使用官方 ASP.NET Core 9.0 運行時映像作為基礎映像
-FROM mcr.microsoft.com/dotnet/asp.net:9.0 AS base 
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base 
 WORKDIR /app
 # Http 端口
 EXPOSE 80
@@ -7,7 +7,7 @@ EXPOSE 80
 EXPOSE 443
 
 # 使用官方 ASP.NET Core 9.0 SDK 映像作為構建映像
-FROM mcr.microsoft.com/dotnet/sdk:9.0 as build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 # 複製當前目錄內容到工作目錄只複製了 .csproj 檔案，以便先執行 dotnet restore（優化建置速度）
 COPY ["Project01_movie_lease_system.csproj", "."]
