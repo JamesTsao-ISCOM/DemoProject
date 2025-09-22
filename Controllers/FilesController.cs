@@ -14,8 +14,11 @@ using System.Text; // for UTF-8 encoding in zip
 using Project01_movie_lease_system.Service;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml.Spreadsheet;
 using System.Linq;
 using System.Text.RegularExpressions;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 
 namespace Project01_movie_lease_system.Controllers
 {
@@ -24,7 +27,7 @@ namespace Project01_movie_lease_system.Controllers
         private readonly FileRepository _fileRepository;
         private readonly IEmailService _emailService;
         private readonly VideoRecordRepository _videoRecordRepository;
-        
+
         public FilesController(FileRepository fileRepository, IEmailService emailService, VideoRecordRepository videoRecordRepository)
         {
             _fileRepository = fileRepository;
@@ -32,7 +35,7 @@ namespace Project01_movie_lease_system.Controllers
             _videoRecordRepository = videoRecordRepository;
         }
         [HttpGet]
-        public IActionResult GetPagedFiles(int pageNumber=1, int pageSize=10)
+        public IActionResult GetPagedFiles(int pageNumber = 1, int pageSize = 10)
         {
             var files = _fileRepository.GetFilesByPage(pageNumber, pageSize);
             return PartialView("_FileList", files);
@@ -544,7 +547,7 @@ namespace Project01_movie_lease_system.Controllers
                 await file.CopyToAsync(stream);
             }
             // 轉換為 PDF
-            using (var workbook = new Workbook())
+            using (var workbook = new Spire.Xls.Workbook())
             {
                 workbook.LoadFromFile(inputPath);
                 workbook.ConverterSetting.SheetFitToPage = true; // 確保內容適配頁面
@@ -644,12 +647,12 @@ namespace Project01_movie_lease_system.Controllers
                     if (file != null)
                     {
                         var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "files", file.StoredFileName);
-                        
+
                         // 處理同名檔案問題
                         var fileName = file.FileName;
                         var originalFileName = fileName;
                         var counter = 1;
-                        
+
                         // 如果檔名已存在，自動加上編號
                         while (attachmentPaths.ContainsKey(fileName))
                         {
@@ -658,7 +661,7 @@ namespace Project01_movie_lease_system.Controllers
                             fileName = $"{fileNameWithoutExtension}({counter}){fileExtension}";
                             counter++;
                         }
-                        
+
                         attachmentPaths.Add(fileName, filePath);
                         Console.WriteLine($"Added Email attachment: {fileName} -> {filePath}");
                     }
@@ -732,7 +735,7 @@ namespace Project01_movie_lease_system.Controllers
             var body = doc.MainDocumentPart.Document.Body;
             foreach (DocumentFormat.OpenXml.Wordprocessing.Paragraph para in body.Descendants<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
             {
-                string paraText = string.Join("", para.Descendants<Text>().Select(t => t.Text));
+                string paraText = string.Join("", para.Descendants<DocumentFormat.OpenXml.Wordprocessing.Text>().Select(t => t.Text));
                 string pattern = $@"\{{\{{\s*{Regex.Escape(placeholder)}\s*\}}\}}";
                 if (Regex.IsMatch(paraText, pattern))
                 {
@@ -946,6 +949,188 @@ namespace Project01_movie_lease_system.Controllers
                 return BadRequest("找不到對應的暫存檔案");
             }
             return PartialView("_FileRow", fileInfo);
+        }
+
+        [HttpPost]
+        public IActionResult FreeConvertToPDF(IFormFile file)
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated)
+            {
+                return Unauthorized("請先登入系統");
+            }
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("請上傳有效的檔案");
+            }
+            var allowedExtensions = new[] { ".docx", ".xlsx" };
+            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest("僅支援 Word, Excel 檔案 ( .docx,.xlsx) 的轉換");
+            }
+            // 1. 儲存上傳的檔案到暫存目錄
+            var inputPath = Path.Combine(Path.GetTempPath(), file.FileName);
+            using (var stream = new FileStream(inputPath, FileMode.Create))
+            {
+                file.CopyTo(stream);
+            }
+            byte[] pdfBytes = null;
+            var outputPath = Path.Combine(Path.GetTempPath(), "output.pdf");
+            iTextSharp.text.Document pdfDoc = new iTextSharp.text.Document();
+            PdfWriter writer = PdfWriter.GetInstance(pdfDoc, new FileStream(outputPath, FileMode.Create));
+            pdfDoc.Open();
+            try
+            {
+                // 設定支援中文的字體
+                string fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "kaiu.ttf");
+                if (!System.IO.File.Exists(fontPath))
+                {
+                    fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "simhei.ttf");
+                }
+                if (!System.IO.File.Exists(fontPath))
+                {
+                    fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "simsun.ttc");
+                }
+                
+                BaseFont baseFont = null;
+                if (System.IO.File.Exists(fontPath))
+                {
+                    baseFont = BaseFont.CreateFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                }
+                else
+                {
+                    // 如果沒有中文字體，使用內建字體
+                    baseFont = BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                }
+                
+                var chineseFont = new iTextSharp.text.Font(baseFont, 12, iTextSharp.text.Font.NORMAL);
+                var titleFont = new iTextSharp.text.Font(baseFont, 14, iTextSharp.text.Font.BOLD);
+
+                if (fileExtension == ".docx")
+                {
+                    using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(inputPath, false))
+                    {
+                        foreach (var para in wordDoc.MainDocumentPart.Document.Body.Elements<DocumentFormat.OpenXml.Wordprocessing.Paragraph>())
+                        {
+                            string text = para.InnerText;
+                            if (!string.IsNullOrEmpty(text))
+                            {
+                                pdfDoc.Add(new iTextSharp.text.Paragraph(text, chineseFont));
+                            }
+                        }
+                    }
+                }
+                else if (fileExtension == ".xlsx")
+                {
+                    using (SpreadsheetDocument excelDoc = SpreadsheetDocument.Open(inputPath, false))
+                    {
+                        var workbookPart = excelDoc.WorkbookPart;
+                        var sheets = workbookPart.Workbook.Sheets.Elements<Sheet>();
+                        foreach (var sheet in sheets)
+                        {
+                            var worksheetPart = (WorksheetPart)workbookPart.GetPartById(sheet.Id);
+                            var sheetData = worksheetPart.Worksheet.Elements<SheetData>().First();
+
+                            // 添加工作表標題
+                            pdfDoc.Add(new iTextSharp.text.Paragraph($"工作表：{sheet.Name}", new iTextSharp.text.Font(baseFont, 12, iTextSharp.text.Font.BOLD)));
+                            pdfDoc.Add(new iTextSharp.text.Paragraph(" ", chineseFont)); // 空行
+                            
+                            // 先計算整個工作表的最大欄數，確保表格結構一致
+                            int maxColumns = 0;
+                            foreach (var row in sheetData.Elements<Row>())
+                            {
+                                int columnCount = row.Elements<Cell>().Count();
+                                if (columnCount > maxColumns)
+                                    maxColumns = columnCount;
+                            }
+                            
+                            // 如果沒有資料，跳過這個工作表
+                            if (maxColumns == 0) continue;
+                            
+                            // 建立真正的表格結構，而不是單欄的文字段落
+                            // 現在：PdfPTable(maxColumns) 依據實際欄數建立表格
+                            var table = new PdfPTable(maxColumns) { WidthPercentage = 100 };
+                            
+                            foreach (var row in sheetData.Elements<Row>())
+                            {
+                                var cells = row.Elements<Cell>().ToList();
+                                bool hasContent = false;
+                                // 現在：每個Excel儲存格對應一個PDF儲存格
+                                for (int i = 0; i < maxColumns; i++)
+                                {
+                                    string cellValue = "";
+                                    if (i < cells.Count)
+                                    {
+                                        cellValue = GetCellValue(cells[i], workbookPart);
+                                        if (!string.IsNullOrWhiteSpace(cellValue))
+                                            hasContent = true;
+                                    }
+                                    // 現在：每個儲存格有適當的內距(Padding=8)、邊框、對齊方式
+                                    var pdfCell = new PdfPCell(new Phrase(cellValue ?? "", chineseFont))
+                                    {
+                                        Padding = 8,                           // 儲存格內距，讓文字不會貼邊
+                                        Border = Rectangle.BOX,                // 完整邊框
+                                        HorizontalAlignment = Element.ALIGN_LEFT,  // 水平靠左對齊
+                                        VerticalAlignment = Element.ALIGN_MIDDLE   // 垂直置中對齊
+                                    };
+                                    table.AddCell(pdfCell);
+                                }
+                                // 如果整列都沒有內容，就移除剛才加入的空白儲存格
+                                if (!hasContent)
+                                {
+                                    // 移除剛加入的空白儲存格
+                                    for (int i = 0; i < maxColumns; i++)
+                                    {
+                                        if (table.Rows.Count > 0)
+                                            table.DeleteLastRow();
+                                    }
+                                }
+                            }
+                            
+                            // 只有當表格有內容時才加入PDF
+                            if (table.Rows.Count > 0)
+                            {
+                                pdfDoc.Add(table);
+                            }
+                            
+                            pdfDoc.Add(new iTextSharp.text.Paragraph(" ", chineseFont)); // 工作表間空行
+                            pdfDoc.Add(new iTextSharp.text.Paragraph(" ", chineseFont)); // 額外空行
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"轉換失敗: {ex.Message}");
+            }
+            finally
+            {
+                pdfDoc.Close();
+                writer.Close();
+            }
+            if (System.IO.File.Exists(outputPath))
+            {
+                pdfBytes = System.IO.File.ReadAllBytes(outputPath);
+                System.IO.File.Delete(outputPath);
+            }
+            if (System.IO.File.Exists(inputPath))
+            {
+                System.IO.File.Delete(inputPath);
+            }
+            return File(pdfBytes, "application/pdf", "output.pdf");
+        }
+        private static string GetCellValue(Cell cell, WorkbookPart workbookPart)
+        {
+            string value = cell.InnerText;
+            if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
+            {
+                var stringTable = workbookPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
+                if (stringTable != null)
+                {
+                    value = stringTable.SharedStringTable.ElementAt(int.Parse(value)).InnerText;
+                }
+            }
+            return value ?? "";
         }
     }
 }

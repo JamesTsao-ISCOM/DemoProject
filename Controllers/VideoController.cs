@@ -148,7 +148,9 @@ namespace Project01_movie_lease_system.Controllers
                     {
                         "blur" => "boxblur=5:1",
                         "brightness" => "eq=brightness=0.1",
-                        "grayscale" => "colorchannelmixer=.3:.4:.3:0:.3:.4:.3:0:.3:.4:.3",
+                        // 【修正】修復灰度效果濾鏡 - 使用正確的 FFmpeg 灰度濾鏡
+                        "grayscale" => "hue=s=0", // 更簡單且可靠的灰度濾鏡
+                        // 備選方案：也可以使用 "desaturate" 或 "colorchannelmixer=0.299:0.587:0.114:0:0.299:0.587:0.114:0:0.299:0.587:0.114"
                         _ => ""
                     };
                     var conversion = FFmpeg.Conversions.New();
@@ -184,15 +186,84 @@ namespace Project01_movie_lease_system.Controllers
                         return StatusCode(500, $"Input file not found: {inputFilePath}");
                     }
                     
+                    // 【修正1】檢查輸入檔案完整性
+                    var inputFileInfo = new FileInfo(inputFilePath);
+                    if (inputFileInfo.Length == 0)
+                    {
+                        return StatusCode(500, "Input file is empty or corrupted");
+                    }
+                    
+                    // 【修正2】執行轉換前先等待，確保檔案寫入完成
+                    await Task.Delay(100); // 等待100ms確保檔案寫入完成
+                    
                     await conversion.Start();
+                    
+                    // 【修正3】轉換完成後等待一段時間，確保檔案寫入完成
+                    await Task.Delay(500); // 等待500ms確保FFmpeg完全釋放檔案
+                    
                     // 檢查輸出檔案是否存在
                     if (!System.IO.File.Exists(outputFilePath))
                     {
                         return StatusCode(500, "Video processing failed - output file not created.");
                     }
+                    
+                    // 【修正4】檢查輸出檔案完整性和大小
+                    var outputFileInfo = new FileInfo(outputFilePath);
+                    if (outputFileInfo.Length == 0)
+                    {
+                        return StatusCode(500, "Video processing failed - output file is empty.");
+                    }
+                    
+                    // 【修正5】驗證輸出檔案是否為有效的影片檔案
+                    try
+                    {
+                        IMediaInfo outputMediaInfo = await FFmpeg.GetMediaInfo(outputFilePath);
+                        if (!outputMediaInfo.VideoStreams.Any())
+                        {
+                            return StatusCode(500, "Video processing failed - output file has no video streams.");
+                        }
+                        
+                        // 檢查影片時長是否合理
+                        double expectedDuration = endTime - startTime;
+                        double actualDuration = outputMediaInfo.Duration.TotalSeconds;
+                        double durationTolerance = Math.Max(1.0, expectedDuration * 0.1); // 10% 容差
+                        
+                        if (Math.Abs(actualDuration - expectedDuration) > durationTolerance)
+                        {
+                            Console.WriteLine($"Warning: Duration mismatch. Expected: {expectedDuration}s, Actual: {actualDuration}s");
+                            // 不回傳錯誤，只記錄警告，因為可能是正常的編碼差異
+                        }
+                    }
+                    catch (Exception validationEx)
+                    {
+                        Console.WriteLine($"Warning: Failed to validate output file: {validationEx.Message}");
+                        return StatusCode(500, "Video processing failed - output file validation failed.");
+                    }
 
-                    // 讀取處理後的檔案
-                    byte[] fileBytes = await System.IO.File.ReadAllBytesAsync(outputFilePath);
+                    // 【修正6】多次嘗試讀取檔案，避免檔案鎖定問題
+                    byte[] fileBytes = null;
+                    int maxRetries = 3;
+                    for (int retry = 0; retry < maxRetries; retry++)
+                    {
+                        try
+                        {
+                            fileBytes = await System.IO.File.ReadAllBytesAsync(outputFilePath);
+                            if (fileBytes.Length > 0)
+                            {
+                                break; // 成功讀取
+                            }
+                        }
+                        catch (IOException ioEx) when (retry < maxRetries - 1)
+                        {
+                            Console.WriteLine($"Retry {retry + 1}: Failed to read output file: {ioEx.Message}");
+                            await Task.Delay(200); // 等待200ms後重試
+                        }
+                    }
+                    
+                    if (fileBytes == null || fileBytes.Length == 0)
+                    {
+                        return StatusCode(500, "Failed to read processed video file.");
+                    }
 
                     // 設定 Content-Type
                     string contentType = format switch
@@ -201,17 +272,33 @@ namespace Project01_movie_lease_system.Controllers
                         "webm" => "video/webm",
                         _ => "application/octet-stream"
                     };
-                    // 清理臨時檔案
-                    try
+                    
+                    // 【修正7】延遲清理臨時檔案，確保檔案已被完全讀取
+                    _ = Task.Run(async () =>
                     {
-                        System.IO.File.Delete(inputFilePath);
-                        System.IO.File.Delete(outputFilePath);
-                    }
-                    catch (Exception cleanupEx)
-                    {
-                        // 記錄清理錯誤，但不影響回應
-                        Console.WriteLine($"Warning: Failed to cleanup temp files: {cleanupEx.Message}");
-                    }
+                        try
+                        {
+                            // 等待一段時間確保檔案已被使用完畢
+                            await Task.Delay(2000);
+                            
+                            if (System.IO.File.Exists(inputFilePath))
+                            {
+                                System.IO.File.Delete(inputFilePath);
+                                Console.WriteLine($"Successfully deleted input file: {inputFilePath}");
+                            }
+                            
+                            if (System.IO.File.Exists(outputFilePath))
+                            {
+                                System.IO.File.Delete(outputFilePath);
+                                Console.WriteLine($"Successfully deleted output file: {outputFilePath}");
+                            }
+                        }
+                        catch (Exception cleanupEx)
+                        {
+                            Console.WriteLine($"Warning: Failed to cleanup temp files: {cleanupEx.Message}");
+                        }
+                    });
+                    
                     return File(fileBytes, contentType, $"processed_video.{format}");
                 }
             }

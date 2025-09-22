@@ -65,6 +65,18 @@ export default class LocalVideoProcessUI{
         this.trimButton.on("click",()=>{
             this.currentSetting.startTime = parseFloat(this.startTimeInput.val()) || 0;
             this.currentSetting.endTime = parseFloat(this.endTimeInput.val()) || 0;
+            if(this.currentSetting.startTime < 0){
+                alert("開始時間不能為負數");
+                return;
+            }
+            if(this.currentSetting.endTime > this.videoPreview[0].duration){
+                alert("結束時間不能超過影片總長度");
+                return;
+            }
+            if(this.currentSetting.startTime >= this.currentSetting.endTime){
+                alert("結束時間必須大於開始時間");
+                return;
+            }
             if(onPreview) onPreview(this.currentSetting);
         });
         this.previewEffectButton.on("click",()=>{

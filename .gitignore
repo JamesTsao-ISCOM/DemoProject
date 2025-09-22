@@ -326,6 +326,10 @@ logs/
 ehthumbs.db
 Thumbs.db
 
+# publish/
+publish/
+
+
 # Node.js dependencies (if you have any frontend build tools)
 node_modules/
 npm-debug.log*

@@ -2,9 +2,15 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base 
 WORKDIR /app
 # Http 端口
-EXPOSE 80
+EXPOSE 8080
 # Https 端口
 EXPOSE 443
+
+# 安裝 FFmpeg
+RUN apt-get update && apt-get install -y ffmpeg && \
+    mkdir -p /app/ffmpeg && \
+    ln -s /usr/bin/ffmpeg /app/ffmpeg/ffmpeg && \
+    ln -s /usr/bin/ffprobe /app/ffmpeg/ffprobe
 
 # 使用官方 ASP.NET Core 9.0 SDK 映像作為構建映像
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build

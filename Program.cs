@@ -38,6 +38,7 @@ builder.Services.Configure<IISServerOptions>(options =>
 
 builder.Services.AddDbContext<MovieDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+Console.WriteLine($"DefaultConnection 連線字串: {builder.Configuration.GetConnectionString("DefaultConnection")}");
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -143,7 +144,7 @@ static string FormatBytes(long bytes)
     const long kb = 1024;
     const long mb = kb * 1024;
     const long gb = mb * 1024;
-    
+
     if (bytes >= gb)
         return $"{bytes / (double)gb:F2} GB";
     else if (bytes >= mb)

@@ -466,7 +466,7 @@ $(document).ready(function () {
         const formData = new FormData(this);
         formData.append("file", $(this).find("input[type=file]")[0].files[0]);
         $.ajax({
-            url: "/Files/ConvertWordToPdf",
+            url: "/Files/FreeConvertToPDF",
             method: "POST",
             data: formData,
             processData: false,
@@ -505,7 +505,7 @@ $(document).ready(function () {
         const formData = new FormData(this);
         formData.append("file", $(this).find("input[type=file]")[0].files[0]);
         $.ajax({
-            url: "/Files/ConvertExcelToPdf",
+            url: "/Files/FreeConvertToPDF",
             method: "POST",
             data: formData,
             processData: false,
