@@ -1,6 +1,188 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "隱私政策";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<style>
+    .privacy-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        line-height: 1.6;
+    }
+    
+    .privacy-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 3px solid #667eea;
+    }
+    
+    .privacy-header h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+    
+    .last-updated {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .section {
+        margin-bottom: 30px;
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .section h2 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+    }
+    
+    .section p {
+        margin-bottom: 12px;
+        color: #555;
+    }
+    
+    .section ul {
+        padding-left: 20px;
+        color: #555;
+    }
+    
+    .section li {
+        margin-bottom: 8px;
+    }
+    
+    .contact-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+        padding: 30px;
+        border-radius: 10px;
+        margin-top: 40px;
+    }
+    
+    .contact-info h2 {
+        color: white;
+        margin-bottom: 15px;
+    }
+    
+    .highlight {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+    }
+</style>
+
+<div class="privacy-container">
+    <div class="privacy-header">
+        <h1>MovieGO 隱私政策</h1>
+        <p class="last-updated">最後更新時間：2025年9月24日</p>
+    </div>
+
+    <div class="highlight">
+        <strong>重要提醒：</strong> 我們重視您的隱私權。本政策說明我們如何收集、使用和保護您的個人資訊。
+    </div>
+
+    <div class="section">
+        <h2>1. 資訊收集</h2>
+        <p>我們會收集以下類型的個人資訊：</p>
+        <ul>
+            <li>註冊時提供的基本資料（姓名、電子郵件、電話號碼）</li>
+            <li>付款資訊（信用卡號碼將經過加密處理）</li>
+            <li>觀影記錄和偏好設定</li>
+            <li>裝置資訊和使用行為數據</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>2. 資訊使用目的</h2>
+        <p>我們使用您的個人資訊用於：</p>
+        <ul>
+            <li>提供電影租借服務</li>
+            <li>處理付款和帳單</li>
+            <li>改善服務品質和用戶體驗</li>
+            <li>發送服務通知和行銷資訊（需要您的同意）</li>
+            <li>個人化內容推薦</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>3. 資訊保護</h2>
+        <p>我們採取以下措施保護您的個人資訊：</p>
+        <ul>
+            <li>使用 SSL 加密技術保護數據傳輸</li>
+            <li>定期更新安全系統和防護措施</li>
+            <li>限制員工存取個人資訊的權限</li>
+            <li>定期進行安全稽核和評估</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>4. 資訊分享</h2>
+        <p>我們不會將您的個人資訊出售給第三方。但在以下情況可能需要分享：</p>
+        <ul>
+            <li>經過您明確同意的情況</li>
+            <li>法律要求或政府機關要求</li>
+            <li>與可信任的合作夥伴（如付款處理商）</li>
+            <li>保護我們的權利和用戶安全</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>5. Cookie 使用</h2>
+        <p>我們使用 Cookie 來：</p>
+        <ul>
+            <li>記住您的登入狀態</li>
+            <li>分析網站使用情況</li>
+            <li>提供個人化體驗</li>
+            <li>改善網站功能</li>
+        </ul>
+        <p>您可以通過瀏覽器設定管理 Cookie 偏好。</p>
+    </div>
+
+    <div class="section">
+        <h2>6. 您的權利</h2>
+        <p>您對個人資料擁有以下權利：</p>
+        <ul>
+            <li>查詢、更正或刪除個人資料</li>
+            <li>限制或反對資料處理</li>
+            <li>資料可攜帶權</li>
+            <li>撤回同意權</li>
+        </ul>
+        <p>如需行使這些權利，請聯繫我們的客服團隊。</p>
+    </div>
+
+    <div class="section">
+        <h2>7. 資料保存</h2>
+        <p>我們會根據以下原則保存您的個人資料：</p>
+        <ul>
+            <li>帳戶資料：直到您刪除帳戶</li>
+            <li>交易記錄：依法律規定保存期限</li>
+            <li>使用記錄：一般保存 2 年</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>8. 政策更新</h2>
+        <p>我們可能會不定期更新此隱私政策。重大變更時，我們會：</p>
+        <ul>
+            <li>在網站上發布通知</li>
+            <li>透過電子郵件通知您</li>
+            <li>提供合理的過渡期間</li>
+        </ul>
+        <p>建議您定期查看本政策的最新版本。</p>
+    </div>
+
+    <div class="contact-info">
+        <h2>聯絡我們</h2>
+        <p>如果您對本隱私政策有任何疑問或建議，請聯繫我們：</p>
+        <p><strong>電子郵件：</strong> privacy@moviego.com</p>
+        <p><strong>客服電話：</strong> 0800-123-456</p>
+        <p><strong>地址：</strong> 台北市信義區電影街 123 號</p>
+    </div>
+</div>

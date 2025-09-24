@@ -18,6 +18,19 @@ namespace Project01_movie_lease_system.Controllers
             _movieRepository = movieRepository;
             _movieImageUploadSettings = movieImageUploadSettings;
         }
+        public IActionResult Index()
+        {
+            return View();
+        }
+        public IActionResult MovieDetails(int id)
+        {
+            var movie = _movieRepository.GetById(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+            return View(movie);
+        }
         // 首次載入頁面
         [HttpGet]
         public IActionResult All()

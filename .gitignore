@@ -326,6 +326,7 @@ logs/
 ehthumbs.db
 Thumbs.db
 
+appsettings.json
 # publish/
 publish/
 

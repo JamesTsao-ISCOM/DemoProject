@@ -1,144 +1,627 @@
-﻿@{
+﻿@model Project01_movie_lease_system.Models.HomeIndexViewModel
+@{
     ViewData["Title"] = "首頁";
+    
+    // 輔助方法 - 獲取電影類型對應的 Bootstrap 顏色
+    string GetTypeColor(Project01_movie_lease_system.Models.MovieType type)
+    {
+        return type switch
+        {
+            Project01_movie_lease_system.Models.MovieType.Action => "danger",
+            Project01_movie_lease_system.Models.MovieType.Comedy => "warning",
+            Project01_movie_lease_system.Models.MovieType.Drama => "info",
+            Project01_movie_lease_system.Models.MovieType.Horror => "dark",
+            Project01_movie_lease_system.Models.MovieType.SciFi => "primary",
+            Project01_movie_lease_system.Models.MovieType.Romance => "success",
+            Project01_movie_lease_system.Models.MovieType.Documentary => "secondary",
+            _ => "secondary"
+        };
+    }
+    
+    // 輔助方法 - 獲取電影類型的顯示名稱
+    string GetTypeDisplayName(Project01_movie_lease_system.Models.MovieType type)
+    {
+        return type switch
+        {
+            Project01_movie_lease_system.Models.MovieType.Action => "動作",
+            Project01_movie_lease_system.Models.MovieType.Comedy => "喜劇",
+            Project01_movie_lease_system.Models.MovieType.Drama => "劇情",
+            Project01_movie_lease_system.Models.MovieType.Horror => "恐怖",
+            Project01_movie_lease_system.Models.MovieType.SciFi => "科幻",
+            Project01_movie_lease_system.Models.MovieType.Romance => "愛情",
+            Project01_movie_lease_system.Models.MovieType.Documentary => "紀錄片",
+            _ => type.ToString()
+        };
+    }
+    
+    // 輔助方法 - 獲取電影類型的圖標
+    string GetTypeIcon(Project01_movie_lease_system.Models.MovieType type)
+    {
+        return type switch
+        {
+            Project01_movie_lease_system.Models.MovieType.Action => "bi-lightning-charge",
+            Project01_movie_lease_system.Models.MovieType.Comedy => "bi-emoji-laughing",
+            Project01_movie_lease_system.Models.MovieType.Drama => "bi-heart",
+            Project01_movie_lease_system.Models.MovieType.Horror => "bi-moon-stars",
+            Project01_movie_lease_system.Models.MovieType.SciFi => "bi-rocket",
+            Project01_movie_lease_system.Models.MovieType.Romance => "bi-heart-arrow",
+            Project01_movie_lease_system.Models.MovieType.Documentary => "bi-camera-video",
+            _ => "bi-film"
+        };
+    }
+    
+    // 輔助方法 - 獲取電影類型的背景顏色
+    string GetTypeBgColor(Project01_movie_lease_system.Models.MovieType type)
+    {
+        return type switch
+        {
+            Project01_movie_lease_system.Models.MovieType.Action => "#e74c3c",
+            Project01_movie_lease_system.Models.MovieType.Comedy => "#f39c12",
+            Project01_movie_lease_system.Models.MovieType.Drama => "#3498db",
+            Project01_movie_lease_system.Models.MovieType.Horror => "#9b59b6",
+            Project01_movie_lease_system.Models.MovieType.SciFi => "#1abc9c",
+            Project01_movie_lease_system.Models.MovieType.Romance => "#e91e63",
+            Project01_movie_lease_system.Models.MovieType.Documentary => "#95a5a6",
+            _ => "#6c757d"
+        };
+    }
 }
 
-<div class="mb-10">
-    <!-- Hero 圖片 -->
-    <img src="~/assets/Test_Hero.jpg"
-         alt="hero image"
-         class="img-fluid rounded mx-auto d-block p-3 w-100 rounded"
-         style="object-fit: cover; width: 100%; height: auto;">
-         
-    <h1 class="mt-2 fw-bold">歡迎來到 MovieGO</h1>
-    <h2>受歡迎的電影</h2>
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 400px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hero-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.3;
+        z-index: 1;
+    }
+    
+    .movie-card {
+        transition: all 0.3s ease;
+        border: none;
+        overflow: hidden;
+    }
+    
+    .movie-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    
+    .movie-poster {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .movie-poster::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .movie-card:hover .movie-poster::after {
+        opacity: 1;
+    }
+    
+    .play-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 3;
+    }
+    
+    .movie-card:hover .play-btn {
+        opacity: 1;
+    }
+    
+    .category-badge {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .category-badge:hover {
+        transform: scale(1.05);
+        background: linear-gradient(45deg, #667eea, #764ba2) !important;
+        color: white !important;
+    }
+    
+    .search-section {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+    }
+    
+    .rating-stars {
+        color: #ffc107;
+    }
+    
+    .section-title {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-radius: 2px;
+    }
+</style>
 
-    <!-- 三張圖片 -->
-    <div class="row row-cols-1 row-cols-md-3 g-3">
-    <div class="col">
-        <div class="card shadow h-100">
-            <img src="https://picsum.photos/id/1025/600/400"
-                 alt="movie 1"
-                 class="card-img-top"
-                 style="object-fit: cover; height: 250px;">
-            <div class="card-body">
-                <h3 class="card-title">title</h3>
-                <p class="card-text">description</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="card shadow h-100">
-            <img src="https://picsum.photos/id/1035/600/400"
-                 alt="movie 2"
-                 class="card-img-top"
-                 style="object-fit: cover; height: 250px;">
-            <div class="card-body">
-                <h3 class="card-title">title</h3>
-                <p class="card-text">description</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="col">
-        <div class="card shadow h-100">
-            <img src="https://picsum.photos/id/1041/600/400"
-                 alt="movie 3"
-                 class="card-img-top"
-                 style="object-fit: cover; height: 250px;">
-            <div class="card-body">
-                <h3 class="card-title">title</h3>
-                <p class="card-text">description</p>
-            </div>
-        </div>
-    </div>
-    </div>
-
-
-    <!-- 類型 -->
-    <div class="mb-4 mt-4">
-        <h4 class="fw-bold">電影類型</h4>
-        <div class="d-flex flex-wrap gap-2 mt-2">
-            <span class="badge bg-secondary px-3 py-2">動作</span>
-            <span class="badge bg-secondary px-3 py-2">喜劇</span>
-            <span class="badge bg-secondary px-3 py-2">劇情</span>
-            <span class="badge bg-secondary px-3 py-2">恐怖</span>
-            <span class="badge bg-secondary px-3 py-2">科幻</span>
-            <span class="badge bg-secondary px-3 py-2">愛情</span>
-        </div>
-    </div>
-
-    <!-- 使用者評論 -->
-    <div>
-        <h4 class="fw-bold text-white">使用者評論</h4>
-
-        <!-- 評論項目 -->
-        <div class="mt-3 p-3 rounded bg-dark text-white">
-            <div class="d-flex align-items-center mb-2">
-                <img src="https://i.pravatar.cc/40?img=1" alt="user" class="rounded-circle me-2" width="40" height="40">
-                <div>
-                    <strong>蘇菲亞·卡特</strong><br>
-                    <small class="text-muted">2 週前</small>
+<!-- Hero Section -->
+<section class="hero-section d-flex align-items-center text-white">
+    <img src="~/assets/Test_Hero.jpg" alt="hero background" class="hero-bg">
+    <div class="container hero-content">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">歡迎來到 MovieGO</h1>
+                <p class="lead mb-4">探索最新最熱門的電影，立即租借您喜愛的影片，享受絕佳的觀影體驗</p>
+                <div class="d-flex gap-3 mb-4">
+                    <a href="#featured-movies" class="btn btn-primary btn-lg px-4">
+                        <i class="bi bi-play-circle me-2"></i>立即觀看
+                    </a>
+                    <a href="#movie-categories" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-collection me-2"></i>瀏覽電影
+                    </a>
                 </div>
             </div>
-            <div class="mb-2 text-warning">
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-            </div>
-            <p>超喜歡《失落之城》！劇情引人入勝，角色塑造得很好，必看佳作！</p>
-            <div class="d-flex gap-3">
-                <span><i class="bi bi-hand-thumbs-up"></i> 15</span>
-                <span><i class="bi bi-chat"></i> 2</span>
-            </div>
-        </div>
-
-        <!-- 評論項目 -->
-        <div class="mt-3 p-3 rounded bg-dark text-white">
-            <div class="d-flex align-items-center mb-2">
-                <img src="https://i.pravatar.cc/40?img=2" alt="user" class="rounded-circle me-2" width="40" height="40">
-                <div>
-                    <strong>連恩·班奈特</strong><br>
-                    <small class="text-muted">1 個月前</small>
+            <div class="col-lg-4 text-center">
+                <div class="search-section p-4 rounded shadow">
+                    <h5 class="text-dark mb-3">搜尋電影</h5>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="輸入電影名稱...">
+                        <button class="btn btn-primary" type="button">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <select class="form-select form-select-sm">
+                            <option>所有類型</option>
+                            <option>動作</option>
+                            <option>喜劇</option>
+                            <option>劇情</option>
+                            <option>科幻</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="mb-2 text-warning">
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star"></i>
-            </div>
-            <p>這部電影不錯，但中段的節奏稍微有點慢，整體來說還是值得一看。</p>
-            <div class="d-flex gap-3">
-                <span><i class="bi bi-hand-thumbs-up"></i> 8</span>
-                <span><i class="bi bi-chat"></i> 3</span>
-            </div>
-        </div>
-
-        <!-- 評論項目 -->
-        <div class="mt-3 p-3 rounded bg-dark text-white">
-            <div class="d-flex align-items-center mb-2">
-                <img src="https://i.pravatar.cc/40?img=3" alt="user" class="rounded-circle me-2" width="40" height="40">
-                <div>
-                    <strong>奧莉維亞·海耶斯</strong><br>
-                    <small class="text-muted">2 個月前</small>
-                </div>
-            </div>
-            <div class="mb-2 text-warning">
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-            </div>
-            <p>超棒的電影！畫面非常驚艷，演技也很精湛，非常推薦給大家。</p>
-            <div class="d-flex gap-3">
-                <span><i class="bi bi-hand-thumbs-up"></i> 20</span>
-                <span><i class="bi bi-chat"></i> 1</span>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Featured Movies Section -->
+<section id="featured-movies" class="py-5">
+    <div class="container">
+        <h2 class="section-title fw-bold mb-5">精選熱門電影</h2>
+        <div class="row g-4">
+            @if(Model != null && Model.FeaturedMovies != null && Model.FeaturedMovies.Any())
+            {
+                @foreach(var movie in Model.FeaturedMovies)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card movie-card shadow h-100">
+                            <div class="movie-poster position-relative">
+                                <img src="@(string.IsNullOrEmpty(movie.ImageFileName) ? "https://picsum.photos/id/" + (movie.Id + 1000) + "/400/600" : "/images/" + movie.ImageFileName)" 
+                                     alt="@movie.Title" 
+                                     class="card-img-top" 
+                                     style="height: 350px; object-fit: cover;">
+                                <div class="play-btn">
+                                    <button class="btn btn-light btn-lg rounded-circle">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                </div>
+                                <div class="position-absolute top-0 end-0 m-3">
+                                    @{
+                                        var daysSinceRelease = (DateTime.Now - movie.ReleaseDate).Days;
+                                        string badge = daysSinceRelease <= 30 ? "NEW" : daysSinceRelease <= 90 ? "HOT" : "TOP";
+                                        string badgeColor = daysSinceRelease <= 30 ? "success" : daysSinceRelease <= 90 ? "danger" : "warning";
+                                    }
+                                    <span class="badge bg-@badgeColor">@badge</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">@movie.Title</h5>
+                                    <span class="badge bg-@GetTypeColor(movie.Type)">@GetTypeDisplayName(movie.Type)</span>
+                                </div>
+                                @{
+                                    var avgRating = movie.Reviews != null && movie.Reviews.Any() ? movie.Reviews.Average(r => r.Rating) : 0;
+                                    var reviewCount = movie.Reviews?.Count() ?? 0;
+                                }
+                                <div class="rating-stars mb-2">
+                                    @for(int i = 1; i <= 5; i++)
+                                    {
+                                        if(i <= Math.Floor(avgRating))
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        else if(i <= avgRating)
+                                        {
+                                            <i class="bi bi-star-half"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star"></i>
+                                        }
+                                    }
+                                    <small class="text-muted ms-1">@avgRating.ToString("F1") (@reviewCount)</small>
+                                </div>
+                                <p class="card-text text-muted small mb-3">@(movie.Description.Length > 50 ? movie.Description.Substring(0, 50) + "..." : movie.Description)</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold text-primary fs-5">NT$ @movie.Price</span>
+                                        <small class="text-muted">/3天</small>
+                                    </div>
+                                    <button class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-plus-circle me-1"></i>租借
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- 示例電影卡片 - 當沒有真實數據時顯示 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="card movie-card shadow h-100">
+                        <div class="movie-poster position-relative">
+                            <img src="https://picsum.photos/id/1025/400/600" 
+                                 alt="阿凡達：水之道" 
+                                 class="card-img-top" 
+                                 style="height: 350px; object-fit: cover;">
+                            <div class="play-btn">
+                                <button class="btn btn-light btn-lg rounded-circle">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                            </div>
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="badge bg-success">NEW</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">阿凡達：水之道</h5>
+                                <span class="badge bg-primary">科幻</span>
+                            </div>
+                            <div class="rating-stars mb-2">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                                <small class="text-muted ms-1">4.5 (1,234)</small>
+                            </div>
+                            <p class="card-text text-muted small mb-3">詹姆斯·卡麥隆執導的史詩級科幻巨作，帶您重回潘朵拉星球...</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold text-primary fs-5">NT$ 120</span>
+                                    <small class="text-muted">/3天</small>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-plus-circle me-1"></i>租借
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="card movie-card shadow h-100">
+                        <div class="movie-poster position-relative">
+                            <img src="https://picsum.photos/id/1035/400/600" 
+                                 alt="玩命關頭10" 
+                                 class="card-img-top" 
+                                 style="height: 350px; object-fit: cover;">
+                            <div class="play-btn">
+                                <button class="btn btn-light btn-lg rounded-circle">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                            </div>
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="badge bg-danger">HOT</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">玩命關頭10</h5>
+                                <span class="badge bg-danger">動作</span>
+                            </div>
+                            <div class="rating-stars mb-2">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star"></i>
+                                <small class="text-muted ms-1">4.2 (2,156)</small>
+                            </div>
+                            <p class="card-text text-muted small mb-3">馮·迪索回歸，帶來最刺激的飆車動作場面...</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold text-primary fs-5">NT$ 150</span>
+                                    <small class="text-muted">/3天</small>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-plus-circle me-1"></i>租借
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="card movie-card shadow h-100">
+                        <div class="movie-poster position-relative">
+                            <img src="https://picsum.photos/id/1041/400/600" 
+                                 alt="奧本海默" 
+                                 class="card-img-top" 
+                                 style="height: 350px; object-fit: cover;">
+                            <div class="play-btn">
+                                <button class="btn btn-light btn-lg rounded-circle">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                            </div>
+                            <div class="position-absolute top-0 end-0 m-3">
+                                <span class="badge bg-warning">TOP</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">奧本海默</h5>
+                                <span class="badge bg-info">劇情</span>
+                            </div>
+                            <div class="rating-stars mb-2">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <small class="text-muted ms-1">4.8 (3,421)</small>
+                            </div>
+                            <p class="card-text text-muted small mb-3">諾蘭執導的傳記巨作，探索原子彈之父的內心世界...</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold text-primary fs-5">NT$ 140</span>
+                                    <small class="text-muted">/3天</small>
+                                </div>
+                                <button class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-plus-circle me-1"></i>租借
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="@Url.Action("Index", "Movies")" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-grid me-2"></i>查看更多電影
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Movie Categories Section -->
+<section id="movie-categories" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title fw-bold mb-5">電影類型</h2>
+        <div class="row g-3">
+            @if(Model != null && Model.MovieTypes != null && Model.MovieTypes.Any())
+            {
+                @foreach(var type in Model.MovieTypes)
+                {
+                    <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                        <div class="category-badge badge bg-gradient d-block p-3 text-center" style="background: @GetTypeBgColor(type);">
+                            <i class="bi @GetTypeIcon(type) fs-3 d-block mb-2"></i>
+                            <span>@GetTypeDisplayName(type)</span>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- 默認顯示的電影類型 -->
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                    <div class="category-badge badge bg-gradient d-block p-3 text-center" style="background: #e74c3c;">
+                        <i class="bi bi-lightning-charge fs-3 d-block mb-2"></i>
+                        <span>動作</span>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                    <div class="category-badge badge bg-gradient d-block p-3 text-center" style="background: #f39c12;">
+                        <i class="bi bi-emoji-laughing fs-3 d-block mb-2"></i>
+                        <span>喜劇</span>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                    <div class="category-badge badge bg-gradient d-block p-3 text-center" style="background: #3498db;">
+                        <i class="bi bi-heart fs-3 d-block mb-2"></i>
+                        <span>劇情</span>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                    <div class="category-badge badge bg-gradient d-block p-3 text-center" style="background: #9b59b6;">
+                        <i class="bi bi-moon-stars fs-3 d-block mb-2"></i>
+                        <span>恐怖</span>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                    <div class="category-badge badge bg-gradient d-block p-3 text-center" style="background: #1abc9c;">
+                        <i class="bi bi-rocket fs-3 d-block mb-2"></i>
+                        <span>科幻</span>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                    <div class="category-badge badge bg-gradient d-block p-3 text-center" style="background: #e91e63;">
+                        <i class="bi bi-heart-arrow fs-3 d-block mb-2"></i>
+                        <span>愛情</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- User Reviews Section -->
+<section class="py-5" style="background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);">
+    <div class="container">
+        <h2 class="section-title fw-bold mb-5 text-white">用戶評價與推薦</h2>
+        <div class="row g-4">
+            @if(Model != null && Model.RecentReviews != null && Model.RecentReviews.Any())
+            {
+                @foreach(var review in Model.RecentReviews.Take(3))
+                {
+                    <div class="col-md-4">
+                        <div class="card bg-dark text-white h-100 border-0">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <img src="https://i.pravatar.cc/50?u=@review.Member.Email" alt="user" class="rounded-circle me-3" width="50" height="50">
+                                    <div>
+                                        <h6 class="mb-0">@review.Member.Name</h6>
+                                        <small class="text-muted">@review.ReviewDate.ToString("yyyy/MM/dd")</small>
+                                    </div>
+                                </div>
+                                <div class="rating-stars mb-3">
+                                    @for(int i = 1; i <= 5; i++)
+                                    {
+                                        if(i <= review.Rating)
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star"></i>
+                                        }
+                                    }
+                                </div>
+                                <p class="card-text">「@review.Content」</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex gap-3">
+                                        <span><i class="bi bi-hand-thumbs-up text-primary"></i> @(new Random().Next(5, 25))</span>
+                                        <span><i class="bi bi-chat text-info"></i> @(new Random().Next(0, 8))</span>
+                                    </div>
+                                    <small class="text-success">已驗證租借</small>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">關於電影：@review.Movie.Title</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- 默認評論顯示 -->
+                <div class="col-md-4">
+                    <div class="card bg-dark text-white h-100 border-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://i.pravatar.cc/50?img=1" alt="user" class="rounded-circle me-3" width="50" height="50">
+                                <div>
+                                    <h6 class="mb-0">蘇菲亞·卡特</h6>
+                                    <small class="text-muted">2 週前</small>
+                                </div>
+                            </div>
+                            <div class="rating-stars mb-3">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                            <p class="card-text">「超喜歡《失落之城》！劇情引人入勝，角色塑造得很好，必看佳作！MovieGO的租借服務非常方便。」</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card bg-dark text-white h-100 border-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://i.pravatar.cc/50?img=2" alt="user" class="rounded-circle me-3" width="50" height="50">
+                                <div>
+                                    <h6 class="mb-0">連恩·班奈特</h6>
+                                    <small class="text-muted">1 個月前</small>
+                                </div>
+                            </div>
+                            <div class="rating-stars mb-3">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star"></i>
+                            </div>
+                            <p class="card-text">「這部電影不錯，但中段的節奏稍微有點慢，整體來說還是值得一看。畫質很棒！」</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card bg-dark text-white h-100 border-0">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://i.pravatar.cc/50?img=3" alt="user" class="rounded-circle me-3" width="50" height="50">
+                                <div>
+                                    <h6 class="mb-0">奧莉維亞·海耶斯</h6>
+                                    <small class="text-muted">2 個月前</small>
+                                </div>
+                            </div>
+                            <div class="rating-stars mb-3">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                            <p class="card-text">「超棒的電影！畫面非常驚艷，演技也很精湛，非常推薦給大家。租借流程很順暢。」</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5 bg-primary text-white text-center">
+    <div class="container">
+        <h2 class="mb-4">立即開始您的電影之旅</h2>
+        <p class="lead mb-4">加入 MovieGO 會員，享受更多優惠和專屬內容</p>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="/Account/Register" class="btn btn-light btn-lg px-4">
+                <i class="bi bi-person-plus me-2"></i>立即註冊
+            </a>
+            <a href="/Movies/" class="btn btn-outline-light btn-lg px-4">
+                <i class="bi bi-collection me-2"></i>瀏覽所有電影
+            </a>
+        </div>
+    </div>
+</section>

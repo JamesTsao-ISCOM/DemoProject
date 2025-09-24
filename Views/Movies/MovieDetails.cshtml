@@ -1,0 +1,842 @@
+@model Project01_movie_lease_system.Models.Movie
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<style>
+    .movie-detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 0 60px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .movie-detail-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.3);
+        z-index: 1;
+    }
+    
+    .movie-detail-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .movie-poster-large {
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .movie-info-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        margin-top: -30px;
+        position: relative;
+        z-index: 3;
+    }
+    
+    .movie-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 15px;
+    }
+    
+    .movie-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+        color: #666;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .movie-rating {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+    
+    .movie-price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 25px;
+    }
+    
+    .movie-description {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        color: #555;
+        margin-bottom: 30px;
+    }
+    
+    .trailer-section {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 40px 0;
+    }
+    
+    .trailer-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .youtube-container {
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .youtube-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+    
+    .rental-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        position: sticky;
+        top: 20px;
+    }
+    
+    .rental-price {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .rental-period {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-bottom: 25px;
+    }
+    
+    .btn-rental {
+        background: rgba(255,255,255,0.2);
+        border: 2px solid white;
+        color: white;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+        margin-bottom: 15px;
+    }
+    
+    .btn-rental:hover {
+        background: white;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255,255,255,0.2);
+    }
+    
+    .btn-watchlist {
+        background: transparent;
+        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-watchlist:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: white;
+        color: white;
+    }
+    
+    .stock-info {
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 15px;
+        margin: 20px 0;
+        text-align: left;
+    }
+    
+    .stock-available {
+        color: #4CAF50;
+    }
+    
+    .stock-low {
+        color: #FF9800;
+    }
+    
+    .stock-out {
+        color: #F44336;
+    }
+    
+    .movie-specs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+    }
+    
+    .spec-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .spec-label {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .spec-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .breadcrumb-custom {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    
+    .breadcrumb-custom .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: rgba(255,255,255,0.7);
+    }
+    
+    .breadcrumb-custom .breadcrumb-item a {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-custom .breadcrumb-item.active {
+        color: white;
+    }
+    
+    /* 留言區樣式 */
+    .comments-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin: 40px 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .comments-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .comment-form {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .comment-form .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    
+    .comment-form .form-control {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .comment-form .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .rating-input {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+    
+    .rating-star {
+        font-size: 1.5rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+    
+    .rating-star:hover,
+    .rating-star.active {
+        color: #ffc107;
+    }
+    
+    .btn-submit-comment {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit-comment:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    .comments-list {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .comment-item {
+        border-bottom: 1px solid #eee;
+        padding: 20px 0;
+        transition: background 0.3s ease;
+    }
+    
+    .comment-item:last-child {
+        border-bottom: none;
+    }
+    
+    .comment-item:hover {
+        background: #f8f9fa;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin-left: -10px;
+        margin-right: -10px;
+        border-radius: 8px;
+    }
+    
+    .comment-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .comment-author {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-right: 15px;
+    }
+    
+    .comment-rating {
+        color: #ffc107;
+        margin-right: 15px;
+    }
+    
+    .comment-date {
+        color: #666;
+        font-size: 0.9rem;
+        margin-left: auto;
+    }
+    
+    .comment-content {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+    
+    .comment-actions {
+        display: flex;
+        gap: 15px;
+        font-size: 0.9rem;
+    }
+    
+    .comment-action {
+        color: #666;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+    
+    .comment-action:hover {
+        color: #667eea;
+    }
+    
+    .no-comments {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+    }
+    
+    .no-comments i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.3;
+    }
+</style>
+
+<!-- Movie Detail Header -->
+<section class="movie-detail-header">
+    <div class="container movie-detail-content">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Home" asp-action="Index">首頁</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a asp-controller="Movies" asp-action="Index">電影搜尋</a>
+                </li>
+                <li class="breadcrumb-item active">@Model.Title</li>
+            </ol>
+        </nav>
+        
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <img src="@(string.IsNullOrEmpty(Model.ImageFileName) ? "https://picsum.photos/400/600" : Url.Content("~/uploads/movies/" + Model.ImageFileName))"    
+                     alt="@Model.Title" class="movie-poster-large">
+            </div>
+            <div class="col-md-8">
+                <div class="movie-info-card">
+                    <h1 class="movie-title">@Model.Title</h1>
+                    
+                    <div class="movie-meta">
+                        <div class="meta-item">
+                            <i class="bi bi-calendar-event"></i>
+                            <span>@Model.ReleaseDate.ToString("yyyy")</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-film"></i>
+                            <span class="badge bg-primary">@Model.Type.ToString()</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="bi bi-person-video2"></i>
+                            <span>@Model.Director</span>
+                        </div>
+                    </div>
+                    
+                    <div class="movie-rating">
+                        <div class="rating-stars">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                        </div>
+                        <span class="text-muted">4.5 (1,234 評價)</span>
+                    </div>
+                    
+                    <div class="movie-price">NT$ @Model.Price</div>
+                    
+                    <div class="movie-description">
+                        @(string.IsNullOrEmpty(Model.Description) ? "暫無電影描述..." : Model.Description)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="container py-5">
+    <div class="row">
+        <!-- Left Content -->
+        <div class="col-lg-8">
+            <!-- Movie Specifications -->
+            <div class="movie-specs d-flex">
+                <div class="spec-item w-25">
+                    <div class="spec-label">類型</div>
+                    <div class="spec-value">@Model.Type.ToString()</div>
+                </div>
+                <div class="spec-item w-25">
+                    <div class="spec-label">導演</div>
+                    <div class="spec-value">@Model.Director</div>
+                </div>
+                <div class="spec-item w-25">
+                    <div class="spec-label">發行年份</div>
+                    <div class="spec-value">@Model.ReleaseDate.ToString("yyyy")</div>
+                </div>
+                <div class="spec-item w-25">
+                    <div class="spec-label">租借價格</div>
+                    <div class="spec-value">NT$ @Model.Price</div>
+                </div>
+            </div>
+            
+            <!-- YouTube Trailer Section -->
+            @if (!string.IsNullOrEmpty(Model.YoutubeTrailerUrl))
+            {
+                <div class="trailer-section">
+                    <h3 class="trailer-title">
+                        <i class="bi bi-play-circle-fill text-danger"></i>
+                        電影預告片
+                    </h3>
+                    <div class="youtube-container">
+                        @{
+                            string embedUrl = "";
+                            if (!string.IsNullOrEmpty(Model.YoutubeTrailerUrl))
+                            {
+                                // 轉換 YouTube URL 為嵌入格式
+                                string videoId = "";
+                                if (Model.YoutubeTrailerUrl.Contains("watch?v="))
+                                {
+                                    videoId = Model.YoutubeTrailerUrl.Split("watch?v=")[1].Split("&")[0];
+                                }
+                                else if (Model.YoutubeTrailerUrl.Contains("youtu.be/"))
+                                {
+                                    videoId = Model.YoutubeTrailerUrl.Split("youtu.be/")[1].Split("?")[0];
+                                }
+                                embedUrl = $"https://www.youtube.com/embed/{videoId}?rel=0&modestbranding=1";
+                            }
+                        }
+                        <iframe src="@embedUrl"
+                                title="@Model.Title 預告片"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            }
+            
+            <!-- Movie Description (Extended) -->
+            <div class="mt-5">
+                <h3 class="mb-4">劇情簡介</h3>
+                <div class="movie-description">
+                    @(string.IsNullOrEmpty(Model.Description) ? "暫無詳細劇情介紹..." : Model.Description)
+                </div>
+            </div>
+            
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h3 class="comments-title">
+                    <i class="bi bi-chat-dots"></i>
+                    觀眾評論
+                </h3>
+                
+                <!-- Add Comment Form -->
+                <div class="comment-form">
+                    <h5 class="mb-3">分享您的觀後感</h5>
+                    <form asp-controller="Reviews" asp-action="Create" method="post" id="commentForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="MovieId" value="@Model.Id" />
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label w-100">評分</label>
+                                <div class="rating-input" data-rating="0">
+                                    <i class="bi bi-star rating-star" data-value="1"></i>
+                                    <i class="bi bi-star rating-star" data-value="2"></i>
+                                    <i class="bi bi-star rating-star" data-value="3"></i>
+                                    <i class="bi bi-star rating-star" data-value="4"></i>
+                                    <i class="bi bi-star rating-star" data-value="5"></i>
+                                </div>
+                                <input type="hidden" name="Rating" id="ratingValue" value="0" />
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">評論內容</label>
+                            <textarea class="form-control" id="comment" name="Comment" rows="4" 
+                                      placeholder="請分享您對這部電影的看法..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-submit-comment">
+                            <i class="bi bi-send me-2"></i>
+                            發表評論
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Comments List -->
+                <div class="comments-list">
+                    @if (Model.Reviews != null && Model.Reviews.Any())
+                    {
+                        @foreach (var review in Model.Reviews.OrderByDescending(r => r.ReviewDate))
+                        {
+                            <div class="comment-item">
+                                <div class="comment-header">
+                                    <span class="comment-author">Author Name</span>
+                                    <div class="comment-rating">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <i class="bi bi-star-fill"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <span class="comment-date">@review.ReviewDate.ToString("yyyy/MM/dd HH:mm")</span>
+                                </div>
+                                <div class="comment-content">
+                                    @review.Content
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-comments">
+                            <i class="bi bi-chat-square-dots"></i>
+                            <h5>還沒有評論</h5>
+                            <p class="text-muted">成為第一個分享觀後感的人！</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Sidebar - Rental Card -->
+        <div class="col-lg-4">
+            <div class="rental-card">
+                <h4 class="mb-3">
+                    <i class="bi bi-play-circle me-2"></i>
+                    立即租借
+                </h4>
+                
+                <div class="rental-price">NT$ @Model.Price</div>
+                <div class="rental-period">租借期限：72 小時</div>
+                
+                <!-- Stock Information -->
+                <div class="stock-info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>庫存狀態：</span>
+                        @if (Model.Stock > 10)
+                        {
+                            <span class="stock-available">
+                                <i class="bi bi-check-circle-fill"></i> 充足 (@Model.Stock 部)
+                            </span>
+                        }
+                        else if (Model.Stock > 0)
+                        {
+                            <span class="stock-low">
+                                <i class="bi bi-exclamation-circle-fill"></i> 剩餘 @Model.Stock 部
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="stock-out">
+                                <i class="bi bi-x-circle-fill"></i> 已售完
+                            </span>
+                        }
+                    </div>
+                </div>
+                
+                @if (Model.Stock > 0)
+                {
+                    <form asp-controller="Leases" asp-action="Create" method="post" class="rental-form">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="MovieId" value="@Model.Id" />
+                        
+                        <button type="submit" class="btn-rental">
+                            <i class="bi bi-cart-plus me-2"></i>
+                            立即租借
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <button class="btn-rental" disabled>
+                        <i class="bi bi-x-circle me-2"></i>
+                        暫時缺貨
+                    </button>
+                } 
+                <!-- Additional Info -->
+                <div class="mt-4 pt-3" style="border-top: 1px solid rgba(255,255,255,0.2);">
+                    <small class="d-block mb-2">
+                        <i class="bi bi-shield-check me-1"></i>
+                        安全付款保障
+                    </small>
+                    <small class="d-block mb-2">
+                        <i class="bi bi-clock me-1"></i>
+                        24小時客服支援
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back to Search Button -->
+<div class="container mb-5">
+    <div class="text-center">
+        <a asp-controller="Movies" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-arrow-left me-2"></i>
+            回到電影搜尋
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 租借表單提交處理
+        document.querySelector('.rental-form')?.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>處理中...';
+                submitBtn.disabled = true;
+            }
+        });
+        
+        // 收藏按鈕處理
+        document.querySelector('.btn-watchlist')?.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (icon.classList.contains('bi-heart')) {
+                icon.classList.remove('bi-heart');
+                icon.classList.add('bi-heart-fill');
+                this.innerHTML = '<i class="bi bi-heart-fill me-2"></i>已收藏';
+                this.style.background = 'rgba(255,255,255,0.2)';
+            } else {
+                icon.classList.remove('bi-heart-fill');
+                icon.classList.add('bi-heart');
+                this.innerHTML = '<i class="bi bi-heart me-2"></i>加入收藏';
+                this.style.background = 'transparent';
+            }
+        });
+        
+        // 評分星星處理
+        document.querySelectorAll('.rating-star').forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.dataset.value);
+                const container = this.closest('.rating-input');
+                const hiddenInput = document.getElementById('ratingValue');
+                
+                // 更新隱藏欄位的值
+                hiddenInput.value = rating;
+                container.dataset.rating = rating;
+                
+                // 更新星星的顯示
+                container.querySelectorAll('.rating-star').forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.remove('bi-star');
+                        s.classList.add('bi-star-fill');
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('bi-star-fill');
+                        s.classList.add('bi-star');
+                        s.classList.remove('active');
+                    }
+                });
+            });
+            
+            // 滑鼠懸停效果
+            star.addEventListener('mouseenter', function() {
+                const rating = parseInt(this.dataset.value);
+                const container = this.closest('.rating-input');
+                
+                container.querySelectorAll('.rating-star').forEach((s, index) => {
+                    if (index < rating) {
+                        s.style.color = '#ffc107';
+                    } else {
+                        s.style.color = '#ddd';
+                    }
+                });
+            });
+        });
+        
+        // 滑鼠離開評分區域時恢復原狀
+        document.querySelector('.rating-input')?.addEventListener('mouseleave', function() {
+            const currentRating = parseInt(this.dataset.rating);
+            this.querySelectorAll('.rating-star').forEach((s, index) => {
+                if (index < currentRating) {
+                    s.style.color = '#ffc107';
+                } else {
+                    s.style.color = '#ddd';
+                }
+            });
+        });
+        
+        // 評論表單提交處理
+        document.getElementById('commentForm')?.addEventListener('submit', function(e) {
+            const rating = document.getElementById('ratingValue').value;
+            const comment = document.getElementById('comment').value;
+            const name = document.getElementById('reviewerName').value;
+            
+            if (rating === '0') {
+                e.preventDefault();
+                alert('請選擇評分！');
+                return;
+            }
+            
+            if (comment.trim() === '') {
+                e.preventDefault();
+                alert('請輸入評論內容！');
+                return;
+            }
+            
+            if (name.trim() === '') {
+                e.preventDefault();
+                alert('請輸入您的姓名！');
+                return;
+            }
+            
+            // 提交按鈕狀態變更
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>發表中...';
+                submitBtn.disabled = true;
+            }
+        });
+        
+        // 評論操作（點讚、回覆）
+        document.querySelectorAll('.comment-action').forEach(action => {
+            action.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('bi-hand-thumbs-up')) {
+                    // 點讚功能
+                    if (icon.classList.contains('text-primary')) {
+                        icon.classList.remove('text-primary');
+                        this.innerHTML = '<i class="bi bi-hand-thumbs-up me-1"></i>有用';
+                    } else {
+                        icon.classList.add('text-primary');
+                        this.innerHTML = '<i class="bi bi-hand-thumbs-up-fill me-1 text-primary"></i>已點讚';
+                    }
+                } else if (icon.classList.contains('bi-reply')) {
+                    // 回覆功能 (可以在這裡添加回覆邏輯)
+                    alert('回覆功能開發中...');
+                }
+            });
+        });
+    </script>
+}
