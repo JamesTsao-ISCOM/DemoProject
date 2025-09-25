@@ -327,7 +327,6 @@
         cursor: pointer;
         transition: color 0.2s ease;
     }
-    
     .rating-star:hover,
     .rating-star.active {
         color: #ffc107;
@@ -475,11 +474,21 @@
                     
                     <div class="movie-rating">
                         <div class="rating-stars">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-half"></i>
+                            @for(int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Math.Floor(Model.AverageRating))
+                                {
+                                    <i class="bi bi-star-fill"></i>
+                                }
+                                else if (i == Math.Ceiling(Model.AverageRating) && Model.AverageRating % 1 != 0)
+                                {
+                                    <i class="bi bi-star-half"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star"></i>
+                                }
+                            }
                         </div>
                         <span class="text-muted">@Model.AverageRating (@Model.ReviewCount) </span>
                     </div>
@@ -573,7 +582,7 @@
                 <!-- Add Comment Form -->
                 <div class="comment-form">
                     <h5 class="mb-3">分享您的觀後感</h5>
-                    <form asp-controller="Reviews" asp-action="Create" method="post" id="commentForm">
+                    <form id="commentForm">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="MovieId" value="@Model.Id" />
                         
@@ -721,4 +730,6 @@
         </a>
     </div>
 </div>
-
+@section Scripts{
+    <script src="~/js/movieDetails.js"></script>
+}

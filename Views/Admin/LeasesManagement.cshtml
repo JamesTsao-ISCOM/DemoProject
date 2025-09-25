@@ -2,7 +2,10 @@
 @{
     ViewData["Title"] = "租借管理";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    
+    var leaseId = Context.Request.Query["leaseId"].ToString();
+    var memberName = Context.Request.Query["memberName"].ToString();
+    var status = Context.Request.Query["status"].ToString();
+    var leaseDate = Context.Request.Query["leaseDate"].ToString();
     // 輔助方法 - 獲取狀態顯示文字
     string GetStatusText(int status)
     {
@@ -489,28 +492,28 @@
         <i class="bi bi-funnel"></i>
         篩選條件
     </h5>
-    <form itemid="searchLeaseForm" class="row g-3">
+    <form id="searchLeaseForm" class="row g-3">
         <div class="col-md-3">
             <label class="form-label">租借編號</label>
-            <input type="text" name="leaseId" class="form-control" placeholder="輸入租借編號...">
+            <input type="text" name="leaseId" class="form-control" placeholder="輸入租借編號..." value="@leaseId">
         </div>
         <div class="col-md-3">
             <label class="form-label">會員姓名</label>
-            <input type="text" name="memberName" class="form-control" placeholder="輸入會員姓名...">
+            <input type="text" name="memberName" class="form-control" placeholder="輸入會員姓名..." value="@memberName">
         </div>
         <div class="col-md-2">
             <label class="form-label">狀態</label>
             <select name="status" class="form-select">
-                <option value="-1">全部狀態</option>
-                <option value="0">待處理</option>
-                <option value="1">租借中</option>
-                <option value="2">已完成</option>
-                <option value="3">已取消</option>
+                <option value="-1" selected="@(status == "-1")">全部狀態</option>
+                <option value="0" selected="@(status == "0")">待處理</option>
+                <option value="1" selected="@(status == "1")">租借中</option>
+                <option value="2" selected="@(status == "2")">已完成</option>
+                <option value="3" selected="@(status == "3")">已取消</option>
             </select>
         </div>
         <div class="col-md-2">
             <label class="form-label">租借日期</label>
-            <input type="date" name="leaseDate" class="form-control">
+            <input type="date" name="leaseDate" class="form-control" value="@leaseDate">
         </div>
         <div class="col-md-2">
             <label class="form-label">&nbsp;</label>
@@ -518,7 +521,7 @@
                 <button type="submit" class="btn btn-search flex-fill">
                     <i class="bi bi-search"></i>
                 </button>
-                <button type="button" class="btn btn-reset" onclick="this.form.reset()">
+                <button type="button" class="btn btn-reset" id="resetFiltersBtn">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
             </div>
@@ -618,18 +621,18 @@
                                 <div class="action-buttons">
                                     @if (lease.Status == 0)
                                     {
-                                        <button class="btn-action btn-approve" title="批准租借">
+                                        <button class="btn-action btn-approve" title="批准租借" data-lease-id="@lease.Id">
                                             <i class="bi bi-check"></i>
                                             批准
                                         </button>
-                                        <button class="btn-action btn-cancel" title="取消租借">
+                                        <button class="btn-action btn-cancel" title="取消租借" data-lease-id="@lease.Id">
                                             <i class="bi bi-x"></i>
                                             取消
                                         </button>
                                     }
                                     else if (lease.Status == 1)
                                     {
-                                        <button class="btn-action btn-complete" title="完成租借">
+                                        <button class="btn-action btn-complete" title="完成租借" data-lease-id="@lease.Id">
                                             <i class="bi bi-check-square"></i>
                                             完成
                                         </button>

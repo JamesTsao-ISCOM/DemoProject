@@ -87,7 +87,7 @@ namespace Project01_movie_lease_system.Controllers
             return View(members);
         }
         [HttpGet]
-        public IActionResult LeasesManagement(int pageNumber = 1, int pageSize = 10)
+        public IActionResult LeasesManagement(int leaseId = 0, string memberName = "", int status = -1, DateTime? leaseDate = null, int pageNumber = 1, int pageSize = 10)
         {
             // 檢查是否已登入
             if (!User.Identity.IsAuthenticated)
@@ -98,8 +98,16 @@ namespace Project01_movie_lease_system.Controllers
             {
                 return RedirectToAction("Login", "Account");
             }
-            var leases = _leaseRepository.GetPaged(pageNumber, pageSize);
-            return View(leases);
+            if (leaseId == 0 && string.IsNullOrEmpty(memberName) && status == -1 && leaseDate == null)
+            {
+                var leases = _leaseRepository.GetPaged(pageNumber, pageSize);
+                return View(leases);
+            }
+            else
+            {
+                var leases = _leaseRepository.Search(leaseId, memberName, status, leaseDate, pageNumber, pageSize);
+                return View(leases);
+            }
     }
     public IActionResult VideoProcess()
     {

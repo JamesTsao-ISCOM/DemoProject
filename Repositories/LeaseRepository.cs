@@ -83,18 +83,18 @@ namespace Project01_movie_lease_system.Repositories
                 PageSize = pageSize
             };
         }
-        public PagedResult<Lease> GetByMemberId(int memberId, int pageNumber, int pageSize)
+        public PagedResult<Lease> GetByMemberId(int memberId, int pageNumber, int pageSize, int status=-1)
         {
             if (pageNumber < 1 || pageSize < 1)
             {
                 throw new ArgumentException("Page number and page size must be greater than zero.");
             }
-
-            var totalCount = _context.Leases.Count(l => l.MemberId == memberId);
+    
+            var totalCount = _context.Leases.Count(l => l.MemberId == memberId && (status == -1 || l.Status == status));
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-
+            
             var items = _context.Leases
-                .Where(l => l.MemberId == memberId)
+                .Where(l => l.MemberId == memberId && (status == -1 || l.Status == status))
                 .OrderByDescending(l => l.LeaseDate)
                 .Include(l => l.Movie)
                 .Skip((pageNumber - 1) * pageSize)

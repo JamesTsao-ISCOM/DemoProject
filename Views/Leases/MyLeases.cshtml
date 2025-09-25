@@ -1,7 +1,7 @@
 @model Project01_movie_lease_system.Common.PagedResult<Project01_movie_lease_system.Models.Lease>
 @{
     ViewData["Title"] = "我的租借紀錄";
-    
+    var status = Context.Request.Query["status"].ToString();
     // 狀態對應的顯示文字和樣式
     string GetStatusText(int status)
     {
@@ -371,23 +371,23 @@
     <!-- Filter Tabs -->
     <div class="filter-tabs">
         <div class="filter-buttons">
-            <a href="#" class="filter-btn active">
+            <a href="/Leases/MyLeases" class="filter-btn @(status == "-1" ? "active" : "")">
                 <i class="bi bi-grid"></i>
                 全部紀錄
             </a>
-            <a href="#" class="filter-btn">
+            <a href="/Leases/MyLeases?status=0" class="filter-btn @(status == "0" ? "active" : "")">
                 <i class="bi bi-clock-history"></i>
                 待處理
             </a>
-            <a href="#" class="filter-btn">
+            <a href="/Leases/MyLeases?status=1" class="filter-btn @(status == "1" ? "active" : "")">
                 <i class="bi bi-play-circle"></i>
                 租借中
             </a>
-            <a href="#" class="filter-btn">
+            <a href="/Leases/MyLeases?status=2" class="filter-btn @(status == "2" ? "active" : "")">
                 <i class="bi bi-check-circle"></i>
                 已完成
             </a>
-            <a href="#" class="filter-btn">
+            <a href="/Leases/MyLeases?status=3" class="filter-btn @(status == "3" ? "active" : "")">
                 <i class="bi bi-x-circle"></i>
                 已取消
             </a>
@@ -479,17 +479,13 @@
                                 <i class="bi bi-play-circle"></i>
                                 立即觀看
                             </a>
-                            <a href="#" class="action-btn btn-secondary-action">
-                                <i class="bi bi-arrow-return-left"></i>
-                                提前歸還
-                            </a>
                         }
                         else if (lease.Status == 0)
                         {
-                            <a href="#" class="action-btn btn-secondary-action">
+                            <button class="action-btn btn-secondary-action" id="button-cancel-lease" data-lease-id="@lease.Id">
                                 <i class="bi bi-x-circle"></i>
                                 取消租借
-                            </a>
+                            </button>
                         }
                         else
                         {
@@ -528,3 +524,6 @@
         })
     }
 </div>
+@section Scripts{
+    <script src="~/js/myLeases.js"></script>
+}

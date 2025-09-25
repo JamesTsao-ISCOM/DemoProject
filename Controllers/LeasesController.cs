@@ -34,7 +34,7 @@ public class LeasesController : Controller
         return View(movie);
     }
 
-    public IActionResult MyLeases(int pageNumber = 1, int pageSize = 10)
+    public IActionResult MyLeases(int status = -1, int pageNumber = 1, int pageSize = 10)
     {
         if (User.FindFirstValue(ClaimTypes.NameIdentifier) == null)
         {
@@ -42,7 +42,7 @@ public class LeasesController : Controller
         }
 
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var leases = _leaseRepository.GetByMemberId(userId, pageNumber, pageSize);
+        var leases = _leaseRepository.GetByMemberId(userId, pageNumber, pageSize, status);
         return View(leases);
     }
 
@@ -157,18 +157,73 @@ public class LeasesController : Controller
         return Json(new { success = true, data = stats });
     }
     [HttpGet]
-    public IActionResult Search(int leaseId=0,string memberName="",int status=-1,DateTime? leaseDate=null,int pageNumber=1, int pageSize=10)
+    public IActionResult Search(int leaseId = 0, string memberName = "", int status = -1, DateTime? leaseDate = null, int pageNumber = 1, int pageSize = 10)
     {
         if (User.FindFirstValue(ClaimTypes.NameIdentifier) == null && User.FindFirstValue(ClaimTypes.Role) != "Admin")
         {
             return Json(new { success = false, message = "請先登入" });
         }
-        if( pageNumber < 1 || pageSize < 1)
+        if (pageNumber < 1 || pageSize < 1)
         {
             return Json(new { success = false, message = "頁碼和每頁大小必須大於零" });
         }
         var result = _leaseRepository.Search(leaseId, memberName, status, leaseDate, pageNumber, pageSize);
         return Json(new { success = true, data = result });
     }
+    [HttpPut]
+    public IActionResult UpdateStatus(int id, int status)
+    {
+        if (User.FindFirstValue(ClaimTypes.NameIdentifier) == null && User.FindFirstValue(ClaimTypes.Role) != "Admin")
+        {
+            return Json(new { success = false, message = "請先登入" });
+        }
+        var existingLease = _leaseRepository.GetById(id);
+        if (existingLease == null)
+        {
+            return NotFound();
+        }
+        if(status == 2 || status == 3)
+        {
+            var movie = _movieRepository.GetById(existingLease.MovieId);
+            if (movie != null)
+            {
+                movie.Stock += 1;
+                _movieRepository.Update(movie);
+            }
+        }
+        existingLease.Status = status;
+        _leaseRepository.Update(existingLease);
+        return Json(new { success = true, message = "租借狀態已更新" });
+    }
+    [HttpPut]
+    public IActionResult CancelLease(int id)
+    {
+        if (User.FindFirstValue(ClaimTypes.NameIdentifier) == null)
+        {
+            return Json(new { success = false, message = "請先登入" });
+        }
 
+        var lease = _leaseRepository.GetById(id);
+        if (lease == null)
+        {
+            return NotFound();
+        }
+
+        if (lease.Status != 0) // 只有待處理的租借可以取消
+        {
+            return BadRequest("只有待處理的租借可以取消");
+        }
+
+        lease.Status = 2; // 設定狀態為 "已取消"
+        _leaseRepository.Update(lease);
+
+        // 更新電影庫存
+        var movie = _movieRepository.GetById(lease.MovieId);
+        if (movie != null)
+        {
+            movie.Stock += 1;
+            _movieRepository.Update(movie);
+        }
+        return Json(new { success = true, message = "租借已取消" });
+    }
 }
