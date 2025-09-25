@@ -49,7 +49,7 @@ namespace Project01_movie_lease_system.Repositories
             };
         }
 
-         public Review? GetById(int id)
+        public Review? GetById(int id)
         {
             return _context.Reviews
                 .Include(r => r.Member)
@@ -57,7 +57,7 @@ namespace Project01_movie_lease_system.Repositories
                 .FirstOrDefault(r => r.Id == id);
         }
 
-        
+
 
 
         public IEnumerable<Review> GetAll()
@@ -94,7 +94,7 @@ namespace Project01_movie_lease_system.Repositories
             return query;
         }
 
-         // 取得某位會員的所有評論
+        // 取得某位會員的所有評論
         public IEnumerable<Review> GetByMemberId(int memberId)
         {
             return _context.Reviews
@@ -126,6 +126,15 @@ namespace Project01_movie_lease_system.Repositories
             }
             _context.Reviews.Remove(review);
             _context.SaveChanges();
+        }
+        public IEnumerable<Review> GetRecentReviews(int count)
+        {
+            return _context.Reviews
+                .Include(r => r.Member)
+                .Include(r => r.Movie)
+                .OrderByDescending(r => r.Rating)
+                .Take(count)
+                .ToList();
         }
     }
 }

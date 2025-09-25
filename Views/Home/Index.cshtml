@@ -193,21 +193,26 @@
             <div class="col-lg-4 text-center">
                 <div class="search-section p-4 rounded shadow">
                     <h5 class="text-dark mb-3">搜尋電影</h5>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="輸入電影名稱...">
-                        <button class="btn btn-primary" type="button">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                    <div class="d-flex gap-2 justify-content-center">
-                        <select class="form-select form-select-sm">
-                            <option>所有類型</option>
-                            <option>動作</option>
-                            <option>喜劇</option>
-                            <option>劇情</option>
-                            <option>科幻</option>
-                        </select>
-                    </div>
+                    <form action="@Url.Action("Index", "Movies")" method="get" id="homeSearchForm">
+                        <div class="input-group mb-3">
+                            <input type="text" name="searchTitle" class="form-control" placeholder="輸入電影名稱..." id="searchInput">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <select name="searchType" class="form-select form-select-sm" id="typeSelect">
+                                <option value="All">所有類型</option>
+                                <option value="Action">動作</option>
+                                <option value="Comedy">喜劇</option>
+                                <option value="Drama">劇情</option>
+                                <option value="Horror">恐怖</option>
+                                <option value="SciFi">科幻</option>
+                                <option value="Romance">愛情</option>
+                                <option value="Documentary">紀錄片</option>
+                            </select>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -226,12 +231,12 @@
                     <div class="col-lg-4 col-md-6">
                         <div class="card movie-card shadow h-100">
                             <div class="movie-poster position-relative">
-                                <img src="@(string.IsNullOrEmpty(movie.ImageFileName) ? "https://picsum.photos/id/" + (movie.Id + 1000) + "/400/600" : "/images/" + movie.ImageFileName)" 
+                                <img src="@(string.IsNullOrEmpty(movie.ImageFileName) ? "https://picsum.photos/400/600" : Url.Content("~/uploads/movies/" + movie.ImageFileName))" 
                                      alt="@movie.Title" 
                                      class="card-img-top" 
                                      style="height: 350px; object-fit: cover;">
                                 <div class="play-btn">
-                                    <button class="btn btn-light btn-lg rounded-circle">
+                                    <button class="btn btn-light btn-lg rounded-circle" onclick="window.location.href='@Url.Action("MovieDetails", "Movies", new { id = movie.Id })'">
                                         <i class="bi bi-play-fill"></i>
                                     </button>
                                 </div>
@@ -277,7 +282,7 @@
                                         <span class="fw-bold text-primary fs-5">NT$ @movie.Price</span>
                                         <small class="text-muted">/3天</small>
                                     </div>
-                                    <button class="btn btn-outline-primary btn-sm">
+                                    <button class="btn btn-outline-primary btn-sm" onClick="window.location.href='@Url.Action("MovieDetails", "Movies", new { id = movie.Id })'">
                                         <i class="bi bi-plus-circle me-1"></i>租借
                                     </button>
                                 </div>
@@ -288,135 +293,11 @@
             }
             else
             {
-                <!-- 示例電影卡片 - 當沒有真實數據時顯示 -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="card movie-card shadow h-100">
-                        <div class="movie-poster position-relative">
-                            <img src="https://picsum.photos/id/1025/400/600" 
-                                 alt="阿凡達：水之道" 
-                                 class="card-img-top" 
-                                 style="height: 350px; object-fit: cover;">
-                            <div class="play-btn">
-                                <button class="btn btn-light btn-lg rounded-circle">
-                                    <i class="bi bi-play-fill"></i>
-                                </button>
-                            </div>
-                            <div class="position-absolute top-0 end-0 m-3">
-                                <span class="badge bg-success">NEW</span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title mb-0">阿凡達：水之道</h5>
-                                <span class="badge bg-primary">科幻</span>
-                            </div>
-                            <div class="rating-stars mb-2">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-half"></i>
-                                <small class="text-muted ms-1">4.5 (1,234)</small>
-                            </div>
-                            <p class="card-text text-muted small mb-3">詹姆斯·卡麥隆執導的史詩級科幻巨作，帶您重回潘朵拉星球...</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="fw-bold text-primary fs-5">NT$ 120</span>
-                                    <small class="text-muted">/3天</small>
-                                </div>
-                                <button class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-plus-circle me-1"></i>租借
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="card movie-card shadow h-100">
-                        <div class="movie-poster position-relative">
-                            <img src="https://picsum.photos/id/1035/400/600" 
-                                 alt="玩命關頭10" 
-                                 class="card-img-top" 
-                                 style="height: 350px; object-fit: cover;">
-                            <div class="play-btn">
-                                <button class="btn btn-light btn-lg rounded-circle">
-                                    <i class="bi bi-play-fill"></i>
-                                </button>
-                            </div>
-                            <div class="position-absolute top-0 end-0 m-3">
-                                <span class="badge bg-danger">HOT</span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title mb-0">玩命關頭10</h5>
-                                <span class="badge bg-danger">動作</span>
-                            </div>
-                            <div class="rating-stars mb-2">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star"></i>
-                                <small class="text-muted ms-1">4.2 (2,156)</small>
-                            </div>
-                            <p class="card-text text-muted small mb-3">馮·迪索回歸，帶來最刺激的飆車動作場面...</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="fw-bold text-primary fs-5">NT$ 150</span>
-                                    <small class="text-muted">/3天</small>
-                                </div>
-                                <button class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-plus-circle me-1"></i>租借
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="card movie-card shadow h-100">
-                        <div class="movie-poster position-relative">
-                            <img src="https://picsum.photos/id/1041/400/600" 
-                                 alt="奧本海默" 
-                                 class="card-img-top" 
-                                 style="height: 350px; object-fit: cover;">
-                            <div class="play-btn">
-                                <button class="btn btn-light btn-lg rounded-circle">
-                                    <i class="bi bi-play-fill"></i>
-                                </button>
-                            </div>
-                            <div class="position-absolute top-0 end-0 m-3">
-                                <span class="badge bg-warning">TOP</span>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title mb-0">奧本海默</h5>
-                                <span class="badge bg-info">劇情</span>
-                            </div>
-                            <div class="rating-stars mb-2">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <small class="text-muted ms-1">4.8 (3,421)</small>
-                            </div>
-                            <p class="card-text text-muted small mb-3">諾蘭執導的傳記巨作，探索原子彈之父的內心世界...</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="fw-bold text-primary fs-5">NT$ 140</span>
-                                    <small class="text-muted">/3天</small>
-                                </div>
-                                <button class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-plus-circle me-1"></i>租借
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="col-12">
+                      <div class="alert alert-info text-center">
+                            目前沒有精選電影可顯示。
+                      </div>
+                 </div>
             }
         </div>
         
@@ -496,7 +377,7 @@
         <div class="row g-4">
             @if(Model != null && Model.RecentReviews != null && Model.RecentReviews.Any())
             {
-                @foreach(var review in Model.RecentReviews.Take(3))
+                @foreach(var review in Model.RecentReviews)
                 {
                     <div class="col-md-4">
                         <div class="card bg-dark text-white h-100 border-0">
@@ -539,72 +420,11 @@
             }
             else
             {
-                <!-- 默認評論顯示 -->
-                <div class="col-md-4">
-                    <div class="card bg-dark text-white h-100 border-0">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <img src="https://i.pravatar.cc/50?img=1" alt="user" class="rounded-circle me-3" width="50" height="50">
-                                <div>
-                                    <h6 class="mb-0">蘇菲亞·卡特</h6>
-                                    <small class="text-muted">2 週前</small>
-                                </div>
-                            </div>
-                            <div class="rating-stars mb-3">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                            </div>
-                            <p class="card-text">「超喜歡《失落之城》！劇情引人入勝，角色塑造得很好，必看佳作！MovieGO的租借服務非常方便。」</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card bg-dark text-white h-100 border-0">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <img src="https://i.pravatar.cc/50?img=2" alt="user" class="rounded-circle me-3" width="50" height="50">
-                                <div>
-                                    <h6 class="mb-0">連恩·班奈特</h6>
-                                    <small class="text-muted">1 個月前</small>
-                                </div>
-                            </div>
-                            <div class="rating-stars mb-3">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star"></i>
-                            </div>
-                            <p class="card-text">「這部電影不錯，但中段的節奏稍微有點慢，整體來說還是值得一看。畫質很棒！」</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="card bg-dark text-white h-100 border-0">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <img src="https://i.pravatar.cc/50?img=3" alt="user" class="rounded-circle me-3" width="50" height="50">
-                                <div>
-                                    <h6 class="mb-0">奧莉維亞·海耶斯</h6>
-                                    <small class="text-muted">2 個月前</small>
-                                </div>
-                            </div>
-                            <div class="rating-stars mb-3">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                            </div>
-                            <p class="card-text">「超棒的電影！畫面非常驚艷，演技也很精湛，非常推薦給大家。租借流程很順暢。」</p>
-                        </div>
-                    </div>
-                </div>
+                <div class="col-12">
+                      <div class="alert alert-info text-center">
+                            目前沒有用戶評價可顯示。
+                      </div>
+                 </div>
             }
         </div>
     </div>

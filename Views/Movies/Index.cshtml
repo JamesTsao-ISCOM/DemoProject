@@ -1,3 +1,4 @@
+@model Project01_movie_lease_system.Common.PagedResult<Project01_movie_lease_system.Models.MovieDetails>
 @{
     ViewData["Title"] = "電影搜尋";
 }
@@ -97,223 +98,159 @@
 
 <!-- Search and Results -->
 <div class="container py-5">
-    <!-- Search Form - 參考 Dashboard 的簡單設計 -->
+    <!-- Combined Search Form -->
     <div class="card mb-3">
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a class="nav-link active" id="searchByName">名稱搜尋</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="searchByType">類型搜尋</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="searchByDate">日期搜尋</a>
-            </li>
-        </ul>
-        <div class="tab-content p-3" id="searchContent">
-            <div class="tab-pane gap-2 fade show active" id="searchByNameContent">
-                <input type="text" class="form-control d-inline-block" style="width: auto;" placeholder="請輸入電影名稱">
-                <button class="btn btn-primary ms-2" id="btn-searchByName">搜尋</button>
-            </div>
-            <div class="tab-pane fade gap-2" id="searchByTypeContent">
-                <select class="form-select d-inline-block" style="width: auto;">
-                    <option value="" disabled selected>選擇類型</option>
-                    <option value="Action">動作片</option>
-                    <option value="Comedy">喜劇片</option>
-                    <option value="Drama">劇情片</option>
-                    <option value="Horror">恐怖片</option>
-                    <option value="SciFi">科幻片</option>
-                    <option value="Romance">愛情片</option>
-                    <option value="Documentary">紀錄片</option>
-                </select>
-                <button class="btn btn-primary ms-2" id="btn-searchByType">搜尋</button>
-            </div>
-            <div class="tab-pane fade gap-2" id="searchByDateContent">
-                <input type="date" class="form-control d-inline-block" style="width: auto;" id="startDate"> 
-                <span class="mx-2">~</span>
-                <input type="date" class="form-control d-inline-block" style="width: auto;" id="endDate">
-                <button class="btn btn-primary ms-2" id="btn-searchByDate">搜尋</button>
-            </div>
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-search me-2"></i>電影搜尋
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" action="@Url.Action("Index", "Movies")" id="searchForm">
+                <div class="row g-3">
+                    <!-- 名稱搜尋 -->
+                    <div class="col-md-4">
+                        <label class="form-label">電影名稱</label>
+                        <input type="text" name="searchTitle" class="form-control" 
+                               placeholder="輸入電影名稱..." 
+                               value="@ViewBag.SearchTitle">
+                    </div>
+                    
+                    <!-- 類型搜尋 -->
+                    <div class="col-md-3">
+                        <label class="form-label">電影類型</label>
+                        <select name="searchType" class="form-select">
+                            <option value="All">所有類型</option>
+                            <option value="Action" selected="@(ViewBag.SearchType == "Action")">動作片</option>
+                            <option value="Comedy" selected="@(ViewBag.SearchType == "Comedy")">喜劇片</option>
+                            <option value="Drama" selected="@(ViewBag.SearchType == "Drama")">劇情片</option>
+                            <option value="Horror" selected="@(ViewBag.SearchType == "Horror")">恐怖片</option>
+                            <option value="SciFi" selected="@(ViewBag.SearchType == "SciFi")">科幻片</option>
+                            <option value="Romance" selected="@(ViewBag.SearchType == "Romance")">愛情片</option>
+                            <option value="Documentary" selected="@(ViewBag.SearchType == "Documentary")">紀錄片</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 日期搜尋 -->
+                    <div class="col-md-2">
+                        <label class="form-label">開始日期</label>
+                        <input type="date" name="startDate" class="form-control" 
+                               value="@ViewBag.StartDate">
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-label">結束日期</label>
+                        <input type="date" name="endDate" class="form-control" 
+                               value="@ViewBag.EndDate">
+                    </div>
+                    
+                    <!-- 搜尋按鈕 -->
+                    <div class="col-md-1">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary w-100 d-block">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 清除篩選按鈕 -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="clearFilters">
+                            <i class="bi bi-x-circle me-1"></i>清除所有篩選
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
+
+    <!-- Search Info Banner -->
+    @if (!string.IsNullOrEmpty(ViewBag.SearchTitle as string) || 
+         !string.IsNullOrEmpty(ViewBag.SearchType as string) || 
+         !string.IsNullOrEmpty(ViewBag.StartDate as string))
+    {
+        <div class="alert alert-info d-flex align-items-center">
+            <i class="bi bi-info-circle me-2"></i>
+            <div class="flex-grow-1">
+                <strong>目前搜尋條件：</strong>
+                @if (!string.IsNullOrEmpty(ViewBag.SearchTitle as string))
+                {
+                    <span class="badge bg-primary me-2">名稱：@ViewBag.SearchTitle</span>
+                }
+                @if (!string.IsNullOrEmpty(ViewBag.SearchType as string))
+                {
+                    <span class="badge bg-success me-2">類型：@ViewBag.SearchType</span>
+                }
+                @if (!string.IsNullOrEmpty(ViewBag.StartDate as string))
+                {
+                    <span class="badge bg-warning text-dark">日期：@ViewBag.StartDate ~ @ViewBag.EndDate</span>
+                }
+            </div>
+            <a href="@Url.Action("Index", "Movies")" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-arrow-clockwise me-1"></i>重置搜尋
+            </a>
+        </div>
+    }
 
     <!-- Results Info -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="fw-bold" id="searchTitle">電影列表</h3>
         <div>
-            <span class="text-muted">找到 156 部電影</span>
+            <span class="text-muted">找到 @Model.TotalCount 部電影</span>
         </div>
     </div>
 
     <!-- Movie Grid -->
     <div class="movie-grid" id="movieList">
         <!-- Sample Movie Card 1 -->
-        <div class="movie-card">
+        @foreach (var movie in Model.Items)
+        {
+            <div class="movie-card">
             <div class="movie-poster">
-                <img src="https://picsum.photos/id/1025/400/600" alt="阿凡達：水之道">
+                <img src="~/uploads/movies/@movie.ImageFileName" alt="@movie.Title">
                 <span class="movie-badge bg-success text-white">NEW</span>
             </div>
             <div class="movie-info">
-                <h3 class="movie-title">阿凡達：水之道</h3>
+                <h3 class="movie-title">@movie.Title</h3>
                 <div class="movie-meta">
-                    <span class="badge bg-primary me-2">科幻</span>
-                    <span>2022 | 詹姆斯·卡麥隆</span>
+                    <span class="badge bg-primary me-2">@movie.Type</span>
+                    <span>@movie.ReleaseDate | @movie.Director</span>
                 </div>
                 <div class="movie-rating">
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-half"></i>
-                    <span class="ms-2 text-muted">4.5 (1,234)</span>
+                @for (int i = 0; i < 5; i++)
+                {
+                    if (i < (int)@movie.AverageRating)
+                    {
+                        <i class="bi bi-star-fill"></i>
+                    }
+                    else if (i == (int)@movie.AverageRating && @movie.AverageRating >= 0.5)
+                    {
+                        <i class="bi bi-star-half"></i>
+                    }
+                    else
+                    {
+                        <i class="bi bi-star"></i>
+                    }
+                }
+                <span class="ms-2 text-muted">@movie.AverageRating | (@movie.ReviewCount)</span>
                 </div>
-                <div class="movie-price">NT$ 120</div>
-                <button class="btn btn-outline-primary btn-sm w-100">
+                <div class="movie-price">NT$ @movie.Price</div>
+                <button class="btn btn-outline-primary btn-sm w-100" 
+                    onclick="location.href='@Url.Action("MovieDetails", "Movies", new { id = @movie.Id })'">
                     <i class="bi bi-play-circle me-1"></i>立即租借
                 </button>
             </div>
-        </div>
-
-        <!-- Sample Movie Card 2 -->
-        <div class="movie-card">
-            <div class="movie-poster">
-                <img src="https://picsum.photos/id/1035/400/600" alt="玩命關頭10">
-                <span class="movie-badge bg-danger text-white">HOT</span>
-            </div>
-            <div class="movie-info">
-                <h3 class="movie-title">玩命關頭10</h3>
-                <div class="movie-meta">
-                    <span class="badge bg-danger me-2">動作</span>
-                    <span>2023 | 路易斯·列特里爾</span>
-                </div>
-                <div class="movie-rating">
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star"></i>
-                    <span class="ms-2 text-muted">4.2 (2,156)</span>
-                </div>
-                <div class="movie-price">NT$ 150</div>
-                <button class="btn btn-outline-primary btn-sm w-100">
-                    <i class="bi bi-play-circle me-1"></i>立即租借
-                </button>
-            </div>
-        </div>
-
-        <!-- Sample Movie Card 3 -->
-        <div class="movie-card">
-            <div class="movie-poster">
-                <img src="https://picsum.photos/id/1041/400/600" alt="奧本海默">
-                <span class="movie-badge bg-warning text-dark">獎項</span>
-            </div>
-            <div class="movie-info">
-                <h3 class="movie-title">奧本海默</h3>
-                <div class="movie-meta">
-                    <span class="badge bg-info me-2">劇情</span>
-                    <span>2023 | 克里斯多福·諾蘭</span>
-                </div>
-                <div class="movie-rating">
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <span class="ms-2 text-muted">4.8 (3,421)</span>
-                </div>
-                <div class="movie-price">NT$ 140</div>
-                <button class="btn btn-outline-primary btn-sm w-100">
-                    <i class="bi bi-play-circle me-1"></i>立即租借
-                </button>
-            </div>
-        </div>
-
-        <!-- Sample Movie Card 4 -->
-        <div class="movie-card">
-            <div class="movie-poster">
-                <img src="https://picsum.photos/id/1050/400/600" alt="蜘蛛人：穿越新宇宙">
-                <span class="movie-badge bg-success text-white">動畫</span>
-            </div>
-            <div class="movie-info">
-                <h3 class="movie-title">蜘蛛人：穿越新宇宙</h3>
-                <div class="movie-meta">
-                    <span class="badge bg-primary me-2">科幻</span>
-                    <span>2023 | 動畫電影</span>
-                </div>
-                <div class="movie-rating">
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-half"></i>
-                    <span class="ms-2 text-muted">4.6 (1,876)</span>
-                </div>
-                <div class="movie-price">NT$ 130</div>
-                <button class="btn btn-outline-primary btn-sm w-100">
-                    <i class="bi bi-play-circle me-1"></i>立即租借
-                </button>
-            </div>
-        </div>
-
-        <!-- Sample Movie Card 5 -->
-        <div class="movie-card">
-            <div class="movie-poster">
-                <img src="https://picsum.photos/id/1060/400/600" alt="捍衛戰士：獨行俠">
-                <span class="movie-badge bg-warning text-dark">經典</span>
-            </div>
-            <div class="movie-info">
-                <h3 class="movie-title">捍衛戰士：獨行俠</h3>
-                <div class="movie-meta">
-                    <span class="badge bg-danger me-2">動作</span>
-                    <span>2022 | 約瑟夫·柯辛斯基</span>
-                </div>
-                <div class="movie-rating">
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-half"></i>
-                    <span class="ms-2 text-muted">4.4 (2,987)</span>
-                </div>
-                <div class="movie-price">NT$ 110</div>
-                <button class="btn btn-outline-primary btn-sm w-100">
-                    <i class="bi bi-play-circle me-1"></i>立即租借
-                </button>
-            </div>
-        </div>
-
-        <!-- Sample Movie Card 6 -->
-        <div class="movie-card">
-            <div class="movie-poster">
-                <img src="https://picsum.photos/id/1070/400/600" alt="黑豹2：瓦干達萬歲">
-                <span class="movie-badge bg-dark text-white">超級英雄</span>
-            </div>
-            <div class="movie-info">
-                <h3 class="movie-title">黑豹2：瓦干達萬歲</h3>
-                <div class="movie-meta">
-                    <span class="badge bg-danger me-2">動作</span>
-                    <span>2022 | 萊恩·庫格勒</span>
-                </div>
-                <div class="movie-rating">
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star-fill"></i>
-                    <i class="bi bi-star"></i>
-                    <span class="ms-2 text-muted">4.1 (1,654)</span>
-                </div>
-                <div class="movie-price">NT$ 135</div>
-                <button class="btn btn-outline-primary btn-sm w-100">
-                    <i class="bi bi-play-circle me-1"></i>立即租借
-                </button>
-            </div>
-        </div>
+        </div>   
+        }
     </div>
-
-    <!-- 無搜尋結果提示 (預設隱藏) -->
-    <div id="noResults" style="display: none;" class="text-center py-5">
-        <i class="bi bi-search" style="font-size: 4rem; color: #ccc;"></i>
-        <h4 class="mt-3">找不到符合條件的電影</h4>
-        <p class="text-muted">請嘗試使用其他搜尋條件</p>
-    </div>
+    @if(@Model.TotalCount == 0)
+    {
+        <!-- 無搜尋結果提示 (預設隱藏) -->
+        <div id="noResults" class="text-center py-5">
+            <i class="bi bi-search" style="font-size: 4rem; color: #ccc;"></i>
+            <h4 class="mt-3">找不到符合條件的電影</h4>
+            <p class="text-muted">請嘗試使用其他搜尋條件</p>
+        </div>
+    }
 </div>

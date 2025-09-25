@@ -6,6 +6,7 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using System.Security.Claims;
+using Project01_movie_lease_system.Common;
 
 namespace Project01_movie_lease_system.Controllers
 {
@@ -18,31 +19,79 @@ namespace Project01_movie_lease_system.Controllers
             _movieRepository = movieRepository;
             _movieImageUploadSettings = movieImageUploadSettings;
         }
-        public IActionResult Index()
+        public IActionResult Index(string searchTitle, string searchType, DateTime? startDate, DateTime? endDate, int pageNumber = 1)
         {
-            return View();
+            PagedResult<MovieDetails> movies;
+            int pageSize = 9;
+
+            // 設置 ViewBag 來保持搜尋條件
+            ViewBag.SearchTitle = searchTitle;
+            ViewBag.SearchType = searchType;
+            ViewBag.StartDate = startDate?.ToString("yyyy-MM-dd");
+            ViewBag.EndDate = endDate?.ToString("yyyy-MM-dd");
+            
+            MovieType? movieType = null;
+            if (searchType == "All" || string.IsNullOrEmpty(searchType))
+            {
+                movieType = null;
+            }
+            else
+            {
+                movieType = (MovieType)Enum.Parse(typeof(MovieType), searchType);
+            }
+            // 根據搜尋條件進行查詢
+            if (!string.IsNullOrEmpty(searchTitle) && movieType != null && startDate.HasValue && endDate.HasValue)
+            {
+                // 綜合搜尋：名稱 + 類型 + 日期
+                movies = _movieRepository.SearchMovies(searchTitle, movieType, startDate, endDate, pageNumber, pageSize);
+            }
+            else if (!string.IsNullOrEmpty(searchTitle) && movieType != null)
+            {
+                // 名稱 + 類型搜尋
+                movies = _movieRepository.SearchMovies(searchTitle, movieType, null, null, pageNumber, pageSize);
+            }
+            else if (!string.IsNullOrEmpty(searchTitle) && startDate.HasValue && endDate.HasValue)
+            {
+                // 名稱 + 日期搜尋
+                movies = _movieRepository.SearchMovies(searchTitle, null, startDate, endDate, pageNumber, pageSize);
+            }
+            else if (movieType != null && startDate.HasValue && endDate.HasValue)
+            {
+                // 類型 + 日期搜尋
+                movies = _movieRepository.SearchMovies(null, movieType, startDate, endDate, pageNumber, pageSize);
+            }
+            else if (!string.IsNullOrEmpty(searchTitle))
+            {
+                // 僅名稱搜尋
+                movies = _movieRepository.SearchMovies(searchTitle, null, null, null, pageNumber, pageSize);
+            }
+            else if (movieType != null)
+            {
+                // 僅類型搜尋
+                movies = _movieRepository.SearchMovies(null, movieType, null, null, pageNumber, pageSize);
+            }
+            else if (startDate.HasValue && endDate.HasValue)
+            {
+                // 僅日期搜尋
+                movies = _movieRepository.SearchMovies(null, null, startDate, endDate, pageNumber, pageSize);
+            }
+            else
+            {
+                // 無搜尋條件，顯示所有電影
+                movies = _movieRepository.GetMovieDetailsList(pageNumber, pageSize);
+            }
+
+            return View(movies);
         }
+        
         public IActionResult MovieDetails(int id)
         {
-            var movie = _movieRepository.GetById(id);
+            var movie = _movieRepository.GetMovieDetails(id);
             if (movie == null)
             {
                 return NotFound();
             }
             return View(movie);
-        }
-        // 首次載入頁面
-        [HttpGet]
-        public IActionResult All()
-        {
-            var movies = _movieRepository.GetPaged(1, 10);
-            return View(movies);
-        }
-        [HttpGet]
-        public IActionResult GetPage(int pageNumber, int pageSize)
-        {
-            var movies = _movieRepository.GetPaged(pageNumber, pageSize);
-            return PartialView("_EditMovieList", movies);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
