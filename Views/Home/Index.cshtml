@@ -318,7 +318,7 @@
             {
                 @foreach(var type in Model.MovieTypes)
                 {
-                    <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+                    <div class="col-lg-2 col-md-3 col-sm-4 col-6" onclick="window.location.href='@Url.Action("Index", "Movies", new { searchType = type })'">
                         <div class="category-badge badge bg-gradient d-block p-3 text-center" style="background: @GetTypeBgColor(type);">
                             <i class="bi @GetTypeIcon(type) fs-3 d-block mb-2"></i>
                             <span>@GetTypeDisplayName(type)</span>

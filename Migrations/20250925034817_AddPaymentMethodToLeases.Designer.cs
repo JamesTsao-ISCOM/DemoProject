@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Project01_movie_lease_system.Models;
 
@@ -11,9 +12,11 @@ using Project01_movie_lease_system.Models;
 namespace Project01_movie_lease_system.Migrations
 {
     [DbContext(typeof(MovieDbContext))]
-    partial class MovieDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250925034817_AddPaymentMethodToLeases")]
+    partial class AddPaymentMethodToLeases
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

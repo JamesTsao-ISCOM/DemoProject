@@ -289,11 +289,18 @@ namespace Project01_movie_lease_system.Repositories
         }
         public PagedResult<MovieDetails> SearchMovies(string? movieName, MovieType? type, DateTime? startDate, DateTime? endDate, int pageNumber, int pageSize)
         {
-            var searchMovies = _context.Movies
+            // 建立基礎查詢條件
+            var baseQuery = _context.Movies
                 .Where(m => (string.IsNullOrEmpty(movieName) || m.Title.Contains(movieName)) &&
                             (!type.HasValue || m.Type == type.Value) &&
                             (!startDate.HasValue || m.ReleaseDate.Date >= startDate.Value.Date) &&
-                            (!endDate.HasValue || m.ReleaseDate.Date <= endDate.Value.Date))
+                            (!endDate.HasValue || m.ReleaseDate.Date <= endDate.Value.Date));
+
+            // 先計算總數量（在分頁之前）
+            var totalCount = baseQuery.Count();
+
+            // 然後執行分頁和資料轉換
+            var searchMovies = baseQuery
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .GroupJoin(_context.Reviews,
@@ -315,13 +322,16 @@ namespace Project01_movie_lease_system.Repositories
                               ReviewCount = reviews.Count()
                           })
                 .ToList();
+
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
             return new PagedResult<MovieDetails>
             {
                 Items = searchMovies,
-                TotalCount = searchMovies.Count,
+                TotalCount = totalCount,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                TotalPages = (int)Math.Ceiling((double)searchMovies.Count / pageSize)
+                TotalPages = totalPages
             };
         }
     }

@@ -23,7 +23,7 @@ namespace Project01_movie_lease_system.Repositories
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
             var items = _context.Leases
-                .OrderBy(l => l.Id)
+                .OrderByDescending(l => l.LeaseDate)
                 .Include(l => l.Member)
                 .Include(l => l.Movie)
                 .Skip((pageNumber - 1) * pageSize)
@@ -39,20 +39,82 @@ namespace Project01_movie_lease_system.Repositories
             };
         }
 
-        public IEnumerable<Lease> GetAll()
+        public LeaseStatistics GetStatistics()
+        {
+            var stats = new LeaseStatistics
+            {
+                PendingLeases = _context.Leases.Count(l => l.Status == 0),
+                ActiveLeases = _context.Leases.Count(l => l.Status == 1),
+                CompletedLeases = _context.Leases.Count(l => l.Status == 2),
+                CancelledLeases = _context.Leases.Count(l => l.Status == 3)
+            };
+            return stats;
+        }
+        public PagedResult<Lease> Search(int leaseId=0,string memberName="",int status=-1,DateTime? leaseDate=null,int pageNumber=1, int pageSize=10)
+        {
+            if (pageNumber < 1 || pageSize < 1)
+            {
+                throw new ArgumentException("Page number and page size must be greater than zero.");
+            }
+
+            var query = _context.Leases
+                .Include(l => l.Member)
+                .Include(l => l.Movie)
+                .Where(l => (leaseId == 0 || l.Id == leaseId) &&
+                            (string.IsNullOrEmpty(memberName) || l.Member.Name.Contains(memberName)) &&
+                            (status == -1 || l.Status == status) &&
+                            (!leaseDate.HasValue || l.LeaseDate.Date == leaseDate.Value.Date));
+
+            var totalCount = query.Count();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            var items = query
+                .OrderByDescending(l => l.LeaseDate)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<Lease>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+        public PagedResult<Lease> GetByMemberId(int memberId, int pageNumber, int pageSize)
+        {
+            if (pageNumber < 1 || pageSize < 1)
+            {
+                throw new ArgumentException("Page number and page size must be greater than zero.");
+            }
+
+            var totalCount = _context.Leases.Count(l => l.MemberId == memberId);
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            var items = _context.Leases
+                .Where(l => l.MemberId == memberId)
+                .OrderByDescending(l => l.LeaseDate)
+                .Include(l => l.Movie)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+            return new PagedResult<Lease>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+        }
+        public Lease? GetById(int id)
         {
             return _context.Leases
                 .Include(l => l.Member)
                 .Include(l => l.Movie)
-                .ToList();
-        }
-
-        public IEnumerable<Lease> GetByMemberId(int memberId)
-        {
-            return _context.Leases
-                .Where(l => l.MemberId == memberId)
-                .Include(l => l.Movie)
-                .ToList();
+                .FirstOrDefault(l => l.Id == id);
         }
         public void Add(Lease lease)
         {
@@ -60,6 +122,7 @@ namespace Project01_movie_lease_system.Repositories
             {
                 throw new ArgumentNullException(nameof(lease), "Lease cannot be null.");
             }
+            lease.Status = 0; // 設定狀態為 "待處理"
             _context.Leases.Add(lease);
             _context.SaveChanges();
         }

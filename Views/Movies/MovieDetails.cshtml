@@ -1,6 +1,22 @@
 @model Project01_movie_lease_system.Models.MovieDetails
 @{
     ViewData["Title"] = Model.Title;
+    
+    // 輔助方法 - 將電影類型轉換為中文顯示
+    string GetTypeDisplayName(Project01_movie_lease_system.Models.MovieType type)
+    {
+        return type switch
+        {
+            Project01_movie_lease_system.Models.MovieType.Action => "動作",
+            Project01_movie_lease_system.Models.MovieType.Comedy => "喜劇",
+            Project01_movie_lease_system.Models.MovieType.Drama => "劇情",
+            Project01_movie_lease_system.Models.MovieType.Horror => "恐怖",
+            Project01_movie_lease_system.Models.MovieType.SciFi => "科幻",
+            Project01_movie_lease_system.Models.MovieType.Romance => "愛情",
+            Project01_movie_lease_system.Models.MovieType.Documentary => "紀錄片",
+            _ => type.ToString()
+        };
+    }
 }
 
 <style>
@@ -449,7 +465,7 @@
                         </div>
                         <div class="meta-item">
                             <i class="bi bi-film"></i>
-                            <span class="badge bg-primary">@Model.Type.ToString()</span>
+                            <span class="badge bg-primary">@GetTypeDisplayName(Model.Type)</span>
                         </div>
                         <div class="meta-item">
                             <i class="bi bi-person-video2"></i>
@@ -488,7 +504,7 @@
             <div class="movie-specs d-flex">
                 <div class="spec-item w-25">
                     <div class="spec-label">類型</div>
-                    <div class="spec-value">@Model.Type.ToString()</div>
+                    <div class="spec-value">@GetTypeDisplayName(Model.Type)</div>
                 </div>
                 <div class="spec-item w-25">
                     <div class="spec-label">導演</div>
@@ -668,15 +684,10 @@
                 
                 @if (Model.Stock > 0)
                 {
-                    <form asp-controller="Leases" asp-action="Create" method="post" class="rental-form">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="MovieId" value="@Model.Id" />
-                        
-                        <button type="submit" class="btn-rental">
+                        <button type="submit" class="btn-rental" onclick="window.location.href='@Url.Action("Create", "Leases", new { movieId = Model.Id })'">
                             <i class="bi bi-cart-plus me-2"></i>
                             立即租借
                         </button>
-                    </form>
                 }
                 else
                 {

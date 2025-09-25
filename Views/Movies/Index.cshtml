@@ -1,6 +1,22 @@
 @model Project01_movie_lease_system.Common.PagedResult<Project01_movie_lease_system.Models.MovieDetails>
 @{
     ViewData["Title"] = "電影搜尋";
+    
+    // 輔助方法 - 將電影類型轉換為中文顯示
+    string GetTypeDisplayName(Project01_movie_lease_system.Models.MovieType type)
+    {
+        return type switch
+        {
+            Project01_movie_lease_system.Models.MovieType.Action => "動作",
+            Project01_movie_lease_system.Models.MovieType.Comedy => "喜劇",
+            Project01_movie_lease_system.Models.MovieType.Drama => "劇情",
+            Project01_movie_lease_system.Models.MovieType.Horror => "恐怖",
+            Project01_movie_lease_system.Models.MovieType.SciFi => "科幻",
+            Project01_movie_lease_system.Models.MovieType.Romance => "愛情",
+            Project01_movie_lease_system.Models.MovieType.Documentary => "紀錄片",
+            _ => type.ToString()
+        };
+    }
 }
 
 <style>
@@ -180,7 +196,17 @@
                 }
                 @if (!string.IsNullOrEmpty(ViewBag.SearchType as string))
                 {
-                    <span class="badge bg-success me-2">類型：@ViewBag.SearchType</span>
+                    // 將搜尋類型轉換為中文顯示
+                    string searchTypeChinese;
+                    if(ViewBag.SearchType != "All")
+                    {
+                        var searchTypeEnum = Enum.Parse<Project01_movie_lease_system.Models.MovieType>(ViewBag.SearchType);
+                        searchTypeChinese = GetTypeDisplayName(searchTypeEnum);
+                    }
+                    else{
+                        searchTypeChinese = "所有類型";
+                    }
+                    <span class="badge bg-success me-2">類型：@searchTypeChinese</span>
                 }
                 @if (!string.IsNullOrEmpty(ViewBag.StartDate as string))
                 {
@@ -198,6 +224,7 @@
         <h3 class="fw-bold" id="searchTitle">電影列表</h3>
         <div>
             <span class="text-muted">找到 @Model.TotalCount 部電影</span>
+            <span class="badge bg-info text-dark">第 @Model.PageNumber 頁/共 @Model.TotalPages 頁</span>
         </div>
     </div>
 
@@ -214,7 +241,7 @@
             <div class="movie-info">
                 <h3 class="movie-title">@movie.Title</h3>
                 <div class="movie-meta">
-                    <span class="badge bg-primary me-2">@movie.Type</span>
+                    <span class="badge bg-primary me-2">@GetTypeDisplayName(movie.Type)</span>
                     <span>@movie.ReleaseDate | @movie.Director</span>
                 </div>
                 <div class="movie-rating">
@@ -244,6 +271,13 @@
         </div>   
         }
     </div>
+    @if(@Model.TotalPages > 0){
+         @await Html.PartialAsync("_Pagination", new Project01_movie_lease_system.Common.Pagination{
+            TotalPages = Model.TotalPages,
+            PageNumber = Model.PageNumber,
+            PageSize = Model.PageSize
+        })
+    }
     @if(@Model.TotalCount == 0)
     {
         <!-- 無搜尋結果提示 (預設隱藏) -->
@@ -254,3 +288,6 @@
         </div>
     }
 </div>
+@section Scripts{
+    <script src="~/js/movies.js"></script>
+}

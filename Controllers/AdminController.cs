@@ -19,13 +19,15 @@ namespace Project01_movie_lease_system.Controllers
         private readonly MovieRepository _movieRepository;
         private readonly MemberRepository _memberRepository;
         private readonly FileRepository _fileRepository;
+        private readonly LeaseRepository _leaseRepository;
         public AdminController(AdminRepository adminRepository, MovieRepository movieRepository,
-        MemberRepository memberRepository, FileRepository fileRepository)
+        MemberRepository memberRepository, FileRepository fileRepository, LeaseRepository leaseRepository)
         {
             _adminRepository = adminRepository;
             _movieRepository = movieRepository;
             _memberRepository = memberRepository;
             _fileRepository = fileRepository;
+            _leaseRepository = leaseRepository;
         }
         public IActionResult Index()
         {
@@ -85,18 +87,23 @@ namespace Project01_movie_lease_system.Controllers
             return View(members);
         }
         [HttpGet]
-        public IActionResult LeasesManagement()
+        public IActionResult LeasesManagement(int pageNumber = 1, int pageSize = 10)
         {
             // 檢查是否已登入
             if (!User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Login");
             }
-            return View();
-        }
-        public IActionResult VideoProcess()
-        {
-            if (!User.Identity.IsAuthenticated)
+            if (User.FindFirstValue(ClaimTypes.NameIdentifier) == null && User.FindFirstValue(ClaimTypes.Role) != "Admin")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            var leases = _leaseRepository.GetPaged(pageNumber, pageSize);
+            return View(leases);
+    }
+    public IActionResult VideoProcess()
+    {
+        if (!User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Login");
             }

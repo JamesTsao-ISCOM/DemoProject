@@ -21,7 +21,10 @@ public partial class Lease
 
     public DateTime? ReturnDate { get; set; }
 
+    // 待處理: 0, 租賃中: 1, 已完成: 2, 已取消: 3
     public int Status { get; set; }
+
+    public string payment_method { get; set; }
 
     [ForeignKey("MemberId")]
     [InverseProperty("Leases")]

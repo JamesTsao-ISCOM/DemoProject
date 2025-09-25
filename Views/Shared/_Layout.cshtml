@@ -41,6 +41,7 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile">個人資料</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Leases" asp-action="MyLeases">租借紀錄</a></li>
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">登出</a></li>
                             </ul>
                         </li>
@@ -78,6 +79,7 @@
             &copy; 2025 - MovieGO. All rights reserved.
         </div>
     </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.18/dayjs.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
